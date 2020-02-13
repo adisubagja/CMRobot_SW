@@ -21,33 +21,33 @@ namespace Eigen {
 
 namespace internal {
 
-template <>
-EIGEN_DEFINE_FUNCTION_ALLOWING_MULTIPLE_DEFINITIONS EIGEN_UNUSED Packet4f
-plog<Packet4f>(const Packet4f &_x) {
+template<> EIGEN_DEFINE_FUNCTION_ALLOWING_MULTIPLE_DEFINITIONS EIGEN_UNUSED
+Packet4f plog<Packet4f>(const Packet4f& _x)
+{
   return plog_float(_x);
 }
 
-template <>
-EIGEN_DEFINE_FUNCTION_ALLOWING_MULTIPLE_DEFINITIONS EIGEN_UNUSED Packet4f
-pexp<Packet4f>(const Packet4f &_x) {
+template<> EIGEN_DEFINE_FUNCTION_ALLOWING_MULTIPLE_DEFINITIONS EIGEN_UNUSED
+Packet4f pexp<Packet4f>(const Packet4f& _x)
+{
   return pexp_float(_x);
 }
 
-template <>
-EIGEN_DEFINE_FUNCTION_ALLOWING_MULTIPLE_DEFINITIONS EIGEN_UNUSED Packet2d
-pexp<Packet2d>(const Packet2d &x) {
+template<> EIGEN_DEFINE_FUNCTION_ALLOWING_MULTIPLE_DEFINITIONS EIGEN_UNUSED
+Packet2d pexp<Packet2d>(const Packet2d& x)
+{
   return pexp_double(x);
 }
 
-template <>
-EIGEN_DEFINE_FUNCTION_ALLOWING_MULTIPLE_DEFINITIONS EIGEN_UNUSED Packet4f
-psin<Packet4f>(const Packet4f &_x) {
+template<> EIGEN_DEFINE_FUNCTION_ALLOWING_MULTIPLE_DEFINITIONS EIGEN_UNUSED
+Packet4f psin<Packet4f>(const Packet4f& _x)
+{
   return psin_float(_x);
 }
 
-template <>
-EIGEN_DEFINE_FUNCTION_ALLOWING_MULTIPLE_DEFINITIONS EIGEN_UNUSED Packet4f
-pcos<Packet4f>(const Packet4f &_x) {
+template<> EIGEN_DEFINE_FUNCTION_ALLOWING_MULTIPLE_DEFINITIONS EIGEN_UNUSED
+Packet4f pcos<Packet4f>(const Packet4f& _x)
+{
   return pcos_float(_x);
 }
 
@@ -61,9 +61,9 @@ pcos<Packet4f>(const Packet4f &_x) {
 // it can be inlined and pipelined with other computations, further reducing its
 // effective latency. This is similar to Quake3's fast inverse square root.
 // For detail see here: http://www.beyond3d.com/content/articles/8/
-template <>
-EIGEN_DEFINE_FUNCTION_ALLOWING_MULTIPLE_DEFINITIONS EIGEN_UNUSED Packet4f
-psqrt<Packet4f>(const Packet4f &_x) {
+template<> EIGEN_DEFINE_FUNCTION_ALLOWING_MULTIPLE_DEFINITIONS EIGEN_UNUSED
+Packet4f psqrt<Packet4f>(const Packet4f& _x)
+{
   Packet4f half = pmul(_x, pset1<Packet4f>(.5f));
   Packet4f denormal_mask = _mm_and_ps(
       _mm_cmpge_ps(_x, _mm_setzero_ps()),
@@ -72,32 +72,25 @@ psqrt<Packet4f>(const Packet4f &_x) {
   // Compute approximate reciprocal sqrt.
   Packet4f x = _mm_rsqrt_ps(_x);
   // Do a single step of Newton's iteration.
-  x = pmul(x, psub(pset1<Packet4f>(1.5f), pmul(half, pmul(x, x))));
+  x = pmul(x, psub(pset1<Packet4f>(1.5f), pmul(half, pmul(x,x))));
   // Flush results for denormals to zero.
-  return _mm_andnot_ps(denormal_mask, pmul(_x, x));
+  return _mm_andnot_ps(denormal_mask, pmul(_x,x));
 }
 
 #else
 
-template <>
-EIGEN_DEFINE_FUNCTION_ALLOWING_MULTIPLE_DEFINITIONS EIGEN_UNUSED Packet4f
-psqrt<Packet4f>(const Packet4f &x) {
-  return _mm_sqrt_ps(x);
-}
+template<>EIGEN_DEFINE_FUNCTION_ALLOWING_MULTIPLE_DEFINITIONS EIGEN_UNUSED
+Packet4f psqrt<Packet4f>(const Packet4f& x) { return _mm_sqrt_ps(x); }
 
 #endif
 
-template <>
-EIGEN_DEFINE_FUNCTION_ALLOWING_MULTIPLE_DEFINITIONS EIGEN_UNUSED Packet2d
-psqrt<Packet2d>(const Packet2d &x) {
-  return _mm_sqrt_pd(x);
-}
+template<> EIGEN_DEFINE_FUNCTION_ALLOWING_MULTIPLE_DEFINITIONS EIGEN_UNUSED
+Packet2d psqrt<Packet2d>(const Packet2d& x) { return _mm_sqrt_pd(x); }
 
 #if EIGEN_FAST_MATH
 
-template <>
-EIGEN_DEFINE_FUNCTION_ALLOWING_MULTIPLE_DEFINITIONS EIGEN_UNUSED Packet4f
-prsqrt<Packet4f>(const Packet4f &_x) {
+template<> EIGEN_DEFINE_FUNCTION_ALLOWING_MULTIPLE_DEFINITIONS EIGEN_UNUSED
+Packet4f prsqrt<Packet4f>(const Packet4f& _x) {
   _EIGEN_DECLARE_CONST_Packet4f_FROM_INT(inf, 0x7f800000u);
   _EIGEN_DECLARE_CONST_Packet4f_FROM_INT(nan, 0x7fc00000u);
   _EIGEN_DECLARE_CONST_Packet4f(one_point_five, 1.5f);
@@ -114,8 +107,8 @@ prsqrt<Packet4f>(const Packet4f &_x) {
   // Fill in NaNs and Infs for the negative/zero entries.
   Packet4f neg_mask = _mm_cmplt_ps(_x, _mm_setzero_ps());
   Packet4f zero_mask = _mm_andnot_ps(neg_mask, le_zero_mask);
-  Packet4f infs_and_nans =
-      _mm_or_ps(_mm_and_ps(neg_mask, p4f_nan), _mm_and_ps(zero_mask, p4f_inf));
+  Packet4f infs_and_nans = _mm_or_ps(_mm_and_ps(neg_mask, p4f_nan),
+                                     _mm_and_ps(zero_mask, p4f_inf));
 
   // Do a single step of Newton's iteration.
   x = pmul(x, pmadd(neg_half, pmul(x, x), p4f_one_point_five));
@@ -126,28 +119,24 @@ prsqrt<Packet4f>(const Packet4f &_x) {
 
 #else
 
-template <>
-EIGEN_DEFINE_FUNCTION_ALLOWING_MULTIPLE_DEFINITIONS EIGEN_UNUSED Packet4f
-prsqrt<Packet4f>(const Packet4f &x) {
-  // Unfortunately we can't use the much faster mm_rqsrt_ps since it only
-  // provides an approximation.
+template<> EIGEN_DEFINE_FUNCTION_ALLOWING_MULTIPLE_DEFINITIONS EIGEN_UNUSED
+Packet4f prsqrt<Packet4f>(const Packet4f& x) {
+  // Unfortunately we can't use the much faster mm_rqsrt_ps since it only provides an approximation.
   return _mm_div_ps(pset1<Packet4f>(1.0f), _mm_sqrt_ps(x));
 }
 
 #endif
 
-template <>
-EIGEN_DEFINE_FUNCTION_ALLOWING_MULTIPLE_DEFINITIONS EIGEN_UNUSED Packet2d
-prsqrt<Packet2d>(const Packet2d &x) {
-  // Unfortunately we can't use the much faster mm_rqsrt_pd since it only
-  // provides an approximation.
+template<> EIGEN_DEFINE_FUNCTION_ALLOWING_MULTIPLE_DEFINITIONS EIGEN_UNUSED
+Packet2d prsqrt<Packet2d>(const Packet2d& x) {
+  // Unfortunately we can't use the much faster mm_rqsrt_pd since it only provides an approximation.
   return _mm_div_pd(pset1<Packet2d>(1.0), _mm_sqrt_pd(x));
 }
 
 // Hyperbolic Tangent function.
 template <>
 EIGEN_DEFINE_FUNCTION_ALLOWING_MULTIPLE_DEFINITIONS EIGEN_UNUSED Packet4f
-ptanh<Packet4f>(const Packet4f &x) {
+ptanh<Packet4f>(const Packet4f& x) {
   return internal::generic_fast_tanh_float(x);
 }
 
@@ -155,23 +144,27 @@ ptanh<Packet4f>(const Packet4f &x) {
 
 namespace numext {
 
-template <> EIGEN_DEVICE_FUNC EIGEN_ALWAYS_INLINE float sqrt(const float &x) {
+template<>
+EIGEN_DEVICE_FUNC EIGEN_ALWAYS_INLINE
+float sqrt(const float &x)
+{
   return internal::pfirst(internal::Packet4f(_mm_sqrt_ss(_mm_set_ss(x))));
 }
 
-template <> EIGEN_DEVICE_FUNC EIGEN_ALWAYS_INLINE double sqrt(const double &x) {
+template<>
+EIGEN_DEVICE_FUNC EIGEN_ALWAYS_INLINE
+double sqrt(const double &x)
+{
 #if EIGEN_COMP_GNUC_STRICT
   // This works around a GCC bug generating poor code for _mm_sqrt_pd
-  // See
-  // https://bitbucket.org/eigen/eigen/commits/14f468dba4d350d7c19c9b93072e19f7b3df563b
-  return internal::pfirst(
-      internal::Packet2d(__builtin_ia32_sqrtsd(_mm_set_sd(x))));
+  // See https://bitbucket.org/eigen/eigen/commits/14f468dba4d350d7c19c9b93072e19f7b3df563b
+  return internal::pfirst(internal::Packet2d(__builtin_ia32_sqrtsd(_mm_set_sd(x))));
 #else
   return internal::pfirst(internal::Packet2d(_mm_sqrt_pd(_mm_set_sd(x))));
 #endif
 }
 
-} // namespace numext
+} // end namespace numex
 
 } // end namespace Eigen
 

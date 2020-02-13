@@ -71,12 +71,12 @@ struct sycl_packet_traits : default_packet_traits {
 };
 
 #ifdef SYCL_DEVICE_ONLY
-#define SYCL_PACKET_TRAITS(packet_type, has_blend, unpacket_type, lengths)     \
-  template <>                                                                  \
-  struct packet_traits<unpacket_type>                                          \
-      : sycl_packet_traits<has_blend, lengths> {                               \
-    typedef packet_type type;                                                  \
-    typedef packet_type half;                                                  \
+#define SYCL_PACKET_TRAITS(packet_type, has_blend, unpacket_type, lengths) \
+  template <>                                                              \
+  struct packet_traits<unpacket_type>                                      \
+      : sycl_packet_traits<has_blend, lengths> {                           \
+    typedef packet_type type;                                              \
+    typedef packet_type half;                                              \
   };
 
 SYCL_PACKET_TRAITS(cl::sycl::cl_float4, 1, float, 4)
@@ -88,19 +88,21 @@ SYCL_PACKET_TRAITS(cl::sycl::cl_double2, 0, const double, 2)
 // Make sure this is only available when targeting a GPU: we don't want to
 // introduce conflicts between these packet_traits definitions and the ones
 // we'll use on the host side (SSE, AVX, ...)
-#define SYCL_ARITHMETIC(packet_type)                                           \
-  template <> struct is_arithmetic<packet_type> {                              \
-    enum { value = true };                                                     \
+#define SYCL_ARITHMETIC(packet_type)  \
+  template <>                         \
+  struct is_arithmetic<packet_type> { \
+    enum { value = true };            \
   };
 SYCL_ARITHMETIC(cl::sycl::cl_float4)
 SYCL_ARITHMETIC(cl::sycl::cl_double2)
 #undef SYCL_ARITHMETIC
 
-#define SYCL_UNPACKET_TRAITS(packet_type, unpacket_type, lengths)              \
-  template <> struct unpacket_traits<packet_type> {                            \
-    typedef unpacket_type type;                                                \
-    enum { size = lengths, vectorizable = true, alignment = Aligned16 };       \
-    typedef packet_type half;                                                  \
+#define SYCL_UNPACKET_TRAITS(packet_type, unpacket_type, lengths)        \
+  template <>                                                            \
+  struct unpacket_traits<packet_type> {                                  \
+    typedef unpacket_type type;                                          \
+    enum { size = lengths, vectorizable = true, alignment = Aligned16 }; \
+    typedef packet_type half;                                            \
   };
 SYCL_UNPACKET_TRAITS(cl::sycl::cl_float4, float, 4)
 SYCL_UNPACKET_TRAITS(cl::sycl::cl_double2, double, 2)
@@ -108,17 +110,19 @@ SYCL_UNPACKET_TRAITS(cl::sycl::cl_double2, double, 2)
 #undef SYCL_UNPACKET_TRAITS
 #endif
 
-} // end namespace internal
+}  // end namespace internal
 
 #endif
 
 namespace TensorSycl {
 namespace internal {
 
-template <typename PacketReturnType, int PacketSize> struct PacketWrapper;
+template <typename PacketReturnType, int PacketSize>
+struct PacketWrapper;
 // This function should never get called on the device
 #ifndef SYCL_DEVICE_ONLY
-template <typename PacketReturnType, int PacketSize> struct PacketWrapper {
+template <typename PacketReturnType, int PacketSize>
+struct PacketWrapper {
   typedef typename ::Eigen::internal::unpacket_traits<PacketReturnType>::type
       Scalar;
   template <typename Index>
@@ -137,27 +141,28 @@ template <typename PacketReturnType, int PacketSize> struct PacketWrapper {
 };
 
 #elif defined(SYCL_DEVICE_ONLY)
-template <typename PacketReturnType> struct PacketWrapper<PacketReturnType, 4> {
+template <typename PacketReturnType>
+struct PacketWrapper<PacketReturnType, 4> {
   typedef typename ::Eigen::internal::unpacket_traits<PacketReturnType>::type
       Scalar;
   template <typename Index>
   EIGEN_DEVICE_FUNC static Scalar scalarize(Index index, PacketReturnType &in) {
     switch (index) {
-    case 0:
-      return in.x();
-    case 1:
-      return in.y();
-    case 2:
-      return in.z();
-    case 3:
-      return in.w();
-    default:
-      eigen_assert(false && "INDEX MUST BE BETWEEN 0 and 3");
-      abort();
+      case 0:
+        return in.x();
+      case 1:
+        return in.y();
+      case 2:
+        return in.z();
+      case 3:
+        return in.w();
+      default:
+        eigen_assert(false && "INDEX MUST BE BETWEEN 0 and 3");
+        abort();
     }
   }
-  EIGEN_DEVICE_FUNC static PacketReturnType
-  convert_to_packet_type(Scalar in, Scalar other) {
+  EIGEN_DEVICE_FUNC static PacketReturnType convert_to_packet_type(
+      Scalar in, Scalar other) {
     return PacketReturnType(in, other, other, other);
   }
   EIGEN_DEVICE_FUNC static void set_packet(PacketReturnType &lhs, Scalar *rhs) {
@@ -165,7 +170,8 @@ template <typename PacketReturnType> struct PacketWrapper<PacketReturnType, 4> {
   }
 };
 
-template <typename PacketReturnType> struct PacketWrapper<PacketReturnType, 1> {
+template <typename PacketReturnType>
+struct PacketWrapper<PacketReturnType, 1> {
   typedef typename ::Eigen::internal::unpacket_traits<PacketReturnType>::type
       Scalar;
   template <typename Index>
@@ -181,23 +187,24 @@ template <typename PacketReturnType> struct PacketWrapper<PacketReturnType, 1> {
   }
 };
 
-template <typename PacketReturnType> struct PacketWrapper<PacketReturnType, 2> {
+template <typename PacketReturnType>
+struct PacketWrapper<PacketReturnType, 2> {
   typedef typename ::Eigen::internal::unpacket_traits<PacketReturnType>::type
       Scalar;
   template <typename Index>
   EIGEN_DEVICE_FUNC static Scalar scalarize(Index index, PacketReturnType &in) {
     switch (index) {
-    case 0:
-      return in.x();
-    case 1:
-      return in.y();
-    default:
-      eigen_assert(false && "INDEX MUST BE BETWEEN 0 and 1");
-      abort();
+      case 0:
+        return in.x();
+      case 1:
+        return in.y();
+      default:
+        eigen_assert(false && "INDEX MUST BE BETWEEN 0 and 1");
+        abort();
     }
   }
-  EIGEN_DEVICE_FUNC static PacketReturnType
-  convert_to_packet_type(Scalar in, Scalar other) {
+  EIGEN_DEVICE_FUNC static PacketReturnType convert_to_packet_type(
+      Scalar in, Scalar other) {
     return PacketReturnType(in, other);
   }
   EIGEN_DEVICE_FUNC static void set_packet(PacketReturnType &lhs, Scalar *rhs) {
@@ -207,8 +214,8 @@ template <typename PacketReturnType> struct PacketWrapper<PacketReturnType, 2> {
 
 #endif
 
-} // end namespace internal
-} // end namespace TensorSycl
-} // end namespace Eigen
+}  // end namespace internal
+}  // end namespace TensorSycl
+}  // end namespace Eigen
 
-#endif // EIGEN_INTEROP_HEADERS_SYCL_H
+#endif  // EIGEN_INTEROP_HEADERS_SYCL_H

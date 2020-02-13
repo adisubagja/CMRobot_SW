@@ -15,27 +15,30 @@
 
 #include <Eigen/CXX11/Tensor>
 
-using Eigen::ColMajor;
+using Eigen::Tensor;
 using Eigen::Index;
 using Eigen::RowMajor;
-using Eigen::Tensor;
+using Eigen::ColMajor;
 
-template <typename T>
-static const T &choose(int layout, const T &col, const T &row) {
+
+template<typename T>
+static const T& choose(int layout, const T& col, const T& row) {
   return layout == ColMajor ? col : row;
 }
 
 static internal::TensorBlockShapeType RandomShape() {
-  return internal::random<bool>() ? internal::kUniformAllDims
-                                  : internal::kSkewedInnerDims;
+  return internal::random<bool>()
+             ? internal::kUniformAllDims
+             : internal::kSkewedInnerDims;
 }
 
 template <int NumDims>
-static Index RandomTargetSize(const DSizes<Index, NumDims> &dims) {
+static Index RandomTargetSize(const DSizes<Index, NumDims>& dims) {
   return internal::random<Index>(1, dims.TotalSize());
 }
 
-template <int NumDims> static DSizes<Index, NumDims> RandomDims() {
+template <int NumDims>
+static DSizes<Index, NumDims> RandomDims() {
   array<Index, NumDims> dims;
   for (int i = 0; i < NumDims; ++i) {
     dims[i] = internal::random<int>(1, 20);
@@ -46,57 +49,61 @@ template <int NumDims> static DSizes<Index, NumDims> RandomDims() {
 /** Dummy data type to test TensorBlock copy ops. */
 struct Data {
   Data() : value(0) {}
-  explicit Data(int v) : value(v) {}
+  explicit Data(int v) : value(v) { }
   int value;
 };
 
-bool operator==(const Data &lhs, const Data &rhs) {
+bool operator==(const Data& lhs, const Data& rhs) {
   return lhs.value == rhs.value;
 }
 
-std::ostream &operator<<(std::ostream &os, const Data &d) {
+std::ostream& operator<<(std::ostream& os, const Data& d) {
   os << "Data: value=" << d.value;
   return os;
 }
 
-template <typename T> static T *GenerateRandomData(const Index &size) {
-  T *data = new T[size];
+template <typename T>
+static T* GenerateRandomData(const Index& size) {
+  T* data = new T[size];
   for (int i = 0; i < size; ++i) {
     data[i] = internal::random<T>();
   }
   return data;
 }
 
-template <> Data *GenerateRandomData(const Index &size) {
-  Data *data = new Data[size];
+template <>
+Data* GenerateRandomData(const Index& size) {
+  Data* data = new Data[size];
   for (int i = 0; i < size; ++i) {
     data[i] = Data(internal::random<int>(1, 100));
   }
   return data;
 }
 
-template <int NumDims> static void Debug(DSizes<Index, NumDims> dims) {
+template <int NumDims>
+static void Debug(DSizes<Index, NumDims> dims) {
   for (int i = 0; i < NumDims; ++i) {
     std::cout << dims[i] << "; ";
   }
   std::cout << std::endl;
 }
 
-template <int Layout> static void test_block_mapper_sanity() {
+template <int Layout>
+static void test_block_mapper_sanity()
+{
   typedef internal::TensorBlockMapper<int, Index, 2, Layout> TensorBlockMapper;
 
   DSizes<Index, 2> tensor_dims(100, 100);
 
   // Test uniform blocks.
-  TensorBlockMapper uniform_block_mapper(tensor_dims, internal::kUniformAllDims,
-                                         100);
+  TensorBlockMapper uniform_block_mapper(
+      tensor_dims, internal::kUniformAllDims, 100);
 
   VERIFY_IS_EQUAL(uniform_block_mapper.total_block_count(), 100);
   VERIFY_IS_EQUAL(uniform_block_mapper.block_dims_total_size(), 100);
 
   // 10x10 blocks
-  typename TensorBlockMapper::Block uniform_b0 =
-      uniform_block_mapper.GetBlockForIndex(0, NULL);
+  typename TensorBlockMapper::Block uniform_b0 = uniform_block_mapper.GetBlockForIndex(0, NULL);
   VERIFY_IS_EQUAL(uniform_b0.block_sizes().at(0), 10);
   VERIFY_IS_EQUAL(uniform_b0.block_sizes().at(1), 10);
   // Depending on a layout we stride by cols rows.
@@ -107,15 +114,14 @@ template <int Layout> static void test_block_mapper_sanity() {
   VERIFY_IS_EQUAL(uniform_b0.tensor_strides().at(1), choose(Layout, 100, 1));
 
   // Test skewed to inner dims blocks.
-  TensorBlockMapper skewed_block_mapper(tensor_dims, internal::kSkewedInnerDims,
-                                        100);
+  TensorBlockMapper skewed_block_mapper(
+      tensor_dims, internal::kSkewedInnerDims, 100);
 
   VERIFY_IS_EQUAL(skewed_block_mapper.total_block_count(), 100);
   VERIFY_IS_EQUAL(skewed_block_mapper.block_dims_total_size(), 100);
 
   // 1x100 (100x1) rows/cols depending on a tensor layout.
-  typename TensorBlockMapper::Block skewed_b0 =
-      skewed_block_mapper.GetBlockForIndex(0, NULL);
+  typename TensorBlockMapper::Block skewed_b0 = skewed_block_mapper.GetBlockForIndex(0, NULL);
   VERIFY_IS_EQUAL(skewed_b0.block_sizes().at(0), choose(Layout, 100, 1));
   VERIFY_IS_EQUAL(skewed_b0.block_sizes().at(1), choose(Layout, 1, 100));
   // Depending on a layout we stride by cols rows.
@@ -129,12 +135,11 @@ template <int Layout> static void test_block_mapper_sanity() {
 // Given a TensorBlock "visit" every element accessible though it, and a keep an
 // index in the visited set. Verify that every coeff accessed only once.
 template <typename T, int Layout, int NumDims>
-static void
-UpdateCoeffSet(const internal::TensorBlock<T, Index, NumDims, Layout> &block,
-               Index first_coeff_index, int dim_index,
-               std::set<Index> *visited_coeffs) {
-  const DSizes<Index, NumDims> &block_sizes = block.block_sizes();
-  const DSizes<Index, NumDims> &tensor_strides = block.tensor_strides();
+static void UpdateCoeffSet(
+    const internal::TensorBlock<T, Index, NumDims, Layout>& block,
+    Index first_coeff_index, int dim_index, std::set<Index>* visited_coeffs) {
+  const DSizes<Index, NumDims>& block_sizes = block.block_sizes();
+  const DSizes<Index, NumDims>& tensor_strides = block.tensor_strides();
 
   for (int i = 0; i < block_sizes[dim_index]; ++i) {
     if (tensor_strides[dim_index] == 1) {
@@ -153,8 +158,7 @@ UpdateCoeffSet(const internal::TensorBlock<T, Index, NumDims, Layout> &block,
 template <typename T, int NumDims, int Layout>
 static void test_block_mapper_maps_every_element() {
   typedef internal::TensorBlock<T, Index, NumDims, Layout> TensorBlock;
-  typedef internal::TensorBlockMapper<T, Index, NumDims, Layout>
-      TensorBlockMapper;
+  typedef internal::TensorBlockMapper<T, Index, NumDims, Layout> TensorBlockMapper;
 
   DSizes<Index, NumDims> dims = RandomDims<NumDims>();
 
@@ -182,8 +186,7 @@ static void test_block_mapper_maps_every_element() {
 template <typename T, int NumDims, int Layout>
 static void test_slice_block_mapper_maps_every_element() {
   typedef internal::TensorBlock<T, Index, NumDims, Layout> TensorBlock;
-  typedef internal::TensorSliceBlockMapper<T, Index, NumDims, Layout>
-      TensorSliceBlockMapper;
+  typedef internal::TensorSliceBlockMapper<T, Index, NumDims, Layout> TensorSliceBlockMapper;
 
   DSizes<Index, NumDims> tensor_dims = RandomDims<NumDims>();
   DSizes<Index, NumDims> tensor_slice_offsets = RandomDims<NumDims>();
@@ -236,12 +239,12 @@ static void test_block_io_copy_data_from_source_to_target() {
   DSizes<Index, NumDims> input_tensor_dims = RandomDims<NumDims>();
   const Index input_tensor_size = input_tensor_dims.TotalSize();
 
-  T *input_data = GenerateRandomData<T>(input_tensor_size);
-  T *output_data = new T[input_tensor_size];
+  T* input_data = GenerateRandomData<T>(input_tensor_size);
+  T* output_data = new T[input_tensor_size];
 
   TensorBlockMapper block_mapper(input_tensor_dims, RandomShape(),
                                  RandomTargetSize(input_tensor_dims));
-  T *block_data = new T[block_mapper.block_dims_total_size()];
+  T* block_data = new T[block_mapper.block_dims_total_size()];
 
   for (int i = 0; i < block_mapper.total_block_count(); ++i) {
     TensorBlock block = block_mapper.GetBlockForIndex(i, block_data);
@@ -260,9 +263,9 @@ static void test_block_io_copy_data_from_source_to_target() {
 
 template <int Layout, int NumDims>
 static Index GetInputIndex(Index output_index,
-                           const array<Index, NumDims> &output_to_input_dim_map,
-                           const array<Index, NumDims> &input_strides,
-                           const array<Index, NumDims> &output_strides) {
+                         const array<Index, NumDims>& output_to_input_dim_map,
+                         const array<Index, NumDims>& input_strides,
+                         const array<Index, NumDims>& output_strides) {
   int input_index = 0;
   if (Layout == ColMajor) {
     for (int i = NumDims - 1; i > 0; --i) {
@@ -284,8 +287,8 @@ static Index GetInputIndex(Index output_index,
 }
 
 template <int Layout, int NumDims>
-static array<Index, NumDims>
-ComputeStrides(const array<Index, NumDims> &sizes) {
+static array<Index, NumDims> ComputeStrides(
+    const array<Index, NumDims>& sizes) {
   array<Index, NumDims> strides;
   if (Layout == ColMajor) {
     strides[0] = 1;
@@ -316,12 +319,11 @@ static void test_block_io_copy_using_reordered_dimensions() {
   const Index input_tensor_size = input_tensor_dims.TotalSize();
 
   // Create a random input tensor.
-  T *input_data = GenerateRandomData<T>(input_tensor_size);
+  T* input_data = GenerateRandomData<T>(input_tensor_size);
 
   // Create a random dimension re-ordering/shuffle.
   std::vector<Index> shuffle;
-  for (int i = 0; i < NumDims; ++i)
-    shuffle.push_back(i);
+  for (int i = 0; i < NumDims; ++i) shuffle.push_back(i);
   std::random_shuffle(shuffle.begin(), shuffle.end());
 
   DSizes<Index, NumDims> output_tensor_dims;
@@ -337,8 +339,8 @@ static void test_block_io_copy_using_reordered_dimensions() {
   TensorBlockMapper block_mapper(output_tensor_dims, RandomShape(),
                                  RandomTargetSize(input_tensor_dims));
 
-  T *block_data = new T[block_mapper.block_dims_total_size()];
-  T *output_data = new T[input_tensor_size];
+  T* block_data = new T[block_mapper.block_dims_total_size()];
+  T* output_data = new T[input_tensor_size];
 
   array<Index, NumDims> input_tensor_strides =
       ComputeStrides<Layout, NumDims>(input_tensor_dims);
@@ -369,7 +371,8 @@ static void test_block_io_copy_using_reordered_dimensions() {
 // before/after reordering are the same. Squeezing reads along inner dimensions
 // in this case is illegal, because we reorder innermost dimension.
 template <int Layout>
-static void test_block_io_copy_using_reordered_dimensions_do_not_squeeze() {
+static void test_block_io_copy_using_reordered_dimensions_do_not_squeeze()
+{
   typedef internal::TensorBlock<float, Index, 3, Layout> TensorBlock;
   typedef internal::TensorBlockReader<float, Index, 3, Layout>
       TensorBlockReader;
@@ -390,15 +393,18 @@ static void test_block_io_copy_using_reordered_dimensions_do_not_squeeze() {
   DSizes<Index, 3> block_strides(ComputeStrides<Layout, 3>(block_dims));
 
   const Index tensor_size = tensor_dims.TotalSize();
-  float *tensor_data = GenerateRandomData<float>(tensor_size);
-  float *block_data = new float[tensor_size];
+  float* tensor_data = GenerateRandomData<float>(tensor_size);
+  float* block_data = new float[tensor_size];
 
   TensorBlock block(0, block_dims, block_strides, tensor_strides, block_data);
-  TensorBlockReader::Run(&block, 0, tensor_to_block_dim_map, tensor_strides,
+  TensorBlockReader::Run(&block,
+                         0,
+                         tensor_to_block_dim_map,
+                         tensor_strides,
                          tensor_data);
 
-  TensorMap<Tensor<float, 3, Layout>> block_tensor(block_data, block_dims);
-  TensorMap<Tensor<float, 3, Layout>> tensor_tensor(tensor_data, tensor_dims);
+  TensorMap<Tensor<float, 3, Layout> > block_tensor(block_data, block_dims);
+  TensorMap<Tensor<float, 3, Layout> > tensor_tensor(tensor_data, tensor_dims);
 
   for (Index d0 = 0; d0 < tensor_dims[0]; ++d0) {
     for (Index d1 = 0; d1 < tensor_dims[1]; ++d1) {
@@ -418,7 +424,8 @@ static void test_block_io_copy_using_reordered_dimensions_do_not_squeeze() {
 // before/after reordering are the same. Squeezing reads in this case is allowed
 // because we reorder outer dimensions.
 template <int Layout>
-static void test_block_io_copy_using_reordered_dimensions_squeeze() {
+static void test_block_io_copy_using_reordered_dimensions_squeeze()
+{
   typedef internal::TensorBlock<float, Index, 4, Layout> TensorBlock;
   typedef internal::TensorBlockReader<float, Index, 4, Layout>
       TensorBlockReader;
@@ -441,15 +448,18 @@ static void test_block_io_copy_using_reordered_dimensions_squeeze() {
   DSizes<Index, 4> block_strides(ComputeStrides<Layout, 4>(block_dims));
 
   const Index tensor_size = tensor_dims.TotalSize();
-  float *tensor_data = GenerateRandomData<float>(tensor_size);
-  float *block_data = new float[tensor_size];
+  float* tensor_data = GenerateRandomData<float>(tensor_size);
+  float* block_data = new float[tensor_size];
 
   TensorBlock block(0, block_dims, block_strides, tensor_strides, block_data);
-  TensorBlockReader::Run(&block, 0, tensor_to_block_dim_map, tensor_strides,
+  TensorBlockReader::Run(&block,
+                         0,
+                         tensor_to_block_dim_map,
+                         tensor_strides,
                          tensor_data);
 
-  TensorMap<Tensor<float, 4, Layout>> block_tensor(block_data, block_dims);
-  TensorMap<Tensor<float, 4, Layout>> tensor_tensor(tensor_data, tensor_dims);
+  TensorMap<Tensor<float, 4, Layout> > block_tensor(block_data, block_dims);
+  TensorMap<Tensor<float, 4, Layout> > tensor_tensor(tensor_data, tensor_dims);
 
   for (Index d0 = 0; d0 < tensor_dims[0]; ++d0) {
     for (Index d1 = 0; d1 < tensor_dims[1]; ++d1) {
@@ -467,40 +477,42 @@ static void test_block_io_copy_using_reordered_dimensions_squeeze() {
   delete[] tensor_data;
 }
 
-template <typename Scalar, typename StorageIndex, int Dim>
-class EqualityChecker {
-  const Scalar *input_data;
-  const DSizes<StorageIndex, Dim> &input_dims, &input_strides, &output_dims,
-      &output_strides;
-  void check_recursive(const Scalar *input, const Scalar *output,
-                       int depth = 0) const {
-    if (depth == Dim) {
-      VERIFY_IS_EQUAL(*input, *output);
-      return;
-    }
+template<typename Scalar, typename StorageIndex, int Dim>
+class EqualityChecker
+{
+    const Scalar* input_data;
+    const DSizes<StorageIndex, Dim> &input_dims, &input_strides, &output_dims, &output_strides;
+    void check_recursive(const Scalar* input, const Scalar* output, int depth=0) const
+    {
+        if(depth==Dim)
+        {
+            VERIFY_IS_EQUAL(*input, *output);
+            return;
+        }
 
-    for (int i = 0; i < output_dims[depth]; ++i) {
-      check_recursive(input + i % input_dims[depth] * input_strides[depth],
-                      output + i * output_strides[depth], depth + 1);
+        for(int i=0; i<output_dims[depth]; ++i)
+        {
+            check_recursive(input + i % input_dims[depth] * input_strides[depth], output + i*output_strides[depth], depth+1);
+        }
     }
-  }
-
 public:
-  EqualityChecker(const Scalar *input_data_,
-                  const DSizes<StorageIndex, Dim> &input_dims_,
-                  const DSizes<StorageIndex, Dim> &input_strides_,
-                  const DSizes<StorageIndex, Dim> &output_dims_,
-                  const DSizes<StorageIndex, Dim> &output_strides_)
-      : input_data(input_data_), input_dims(input_dims_),
-        input_strides(input_strides_), output_dims(output_dims_),
-        output_strides(output_strides_) {}
+    EqualityChecker(const Scalar* input_data_,
+            const DSizes<StorageIndex, Dim> &input_dims_, const DSizes<StorageIndex, Dim> &input_strides_,
+            const DSizes<StorageIndex, Dim> &output_dims_, const DSizes<StorageIndex, Dim> &output_strides_)
+        : input_data(input_data_)
+        , input_dims(input_dims_), input_strides(input_strides_)
+        , output_dims(output_dims_), output_strides(output_strides_)
+        {}
 
-  void operator()(const Scalar *output_data) const {
-    check_recursive(input_data, output_data);
-  }
+    void operator()(const Scalar* output_data) const
+    {
+        check_recursive(input_data, output_data);
+    }
 };
 
-template <int Layout> static void test_block_io_zero_stride() {
+template <int Layout>
+static void test_block_io_zero_stride()
+{
   typedef internal::TensorBlock<float, Index, 5, Layout> TensorBlock;
   typedef internal::TensorBlockReader<float, Index, 5, Layout>
       TensorBlockReader;
@@ -514,7 +526,7 @@ template <int Layout> static void test_block_io_zero_stride() {
   input_tensor_dims[2] = 1;
   input_tensor_dims[4] = 1;
   const Index input_tensor_size = input_tensor_dims.TotalSize();
-  float *input_data = GenerateRandomData<float>(input_tensor_size);
+  float* input_data = GenerateRandomData<float>(input_tensor_size);
 
   DSizes<Index, 5> output_tensor_dims = rnd_dims;
 
@@ -529,12 +541,10 @@ template <int Layout> static void test_block_io_zero_stride() {
   input_tensor_strides_with_zeros[4] = 0;
 
   // Verify that data was correctly read/written from/into the block.
-  const EqualityChecker<float, Index, 5> verify_is_equal(
-      input_data, input_tensor_dims, input_tensor_strides, output_tensor_dims,
-      output_tensor_strides);
+  const EqualityChecker<float, Index, 5> verify_is_equal(input_data, input_tensor_dims, input_tensor_strides, output_tensor_dims, output_tensor_strides);
 
   {
-    float *output_data = new float[output_tensor_dims.TotalSize()];
+    float* output_data = new float[output_tensor_dims.TotalSize()];
     TensorBlock read_block(0, output_tensor_dims, output_tensor_strides,
                            input_tensor_strides_with_zeros, output_data);
     TensorBlockReader::Run(&read_block, input_data);
@@ -543,7 +553,7 @@ template <int Layout> static void test_block_io_zero_stride() {
   }
 
   {
-    float *output_data = new float[output_tensor_dims.TotalSize()];
+    float* output_data = new float[output_tensor_dims.TotalSize()];
     TensorBlock write_block(0, output_tensor_dims,
                             input_tensor_strides_with_zeros,
                             output_tensor_strides, input_data);
@@ -555,7 +565,8 @@ template <int Layout> static void test_block_io_zero_stride() {
   delete[] input_data;
 }
 
-template <int Layout> static void test_block_io_squeeze_ones() {
+template <int Layout>
+static void test_block_io_squeeze_ones() {
   typedef internal::TensorBlock<float, Index, 5, Layout> TensorBlock;
   typedef internal::TensorBlockReader<float, Index, 5, Layout>
       TensorBlockReader;
@@ -568,11 +579,11 @@ template <int Layout> static void test_block_io_squeeze_ones() {
     const Index total_size = block_sizes.TotalSize();
 
     // Create a random input tensor.
-    float *input_data = GenerateRandomData<float>(total_size);
+    float* input_data = GenerateRandomData<float>(total_size);
     DSizes<Index, 5> strides(ComputeStrides<Layout, 5>(block_sizes));
 
     {
-      float *output_data = new float[block_sizes.TotalSize()];
+      float* output_data = new float[block_sizes.TotalSize()];
       TensorBlock read_block(0, block_sizes, strides, strides, output_data);
       TensorBlockReader::Run(&read_block, input_data);
       for (int i = 0; i < total_size; ++i) {
@@ -582,7 +593,7 @@ template <int Layout> static void test_block_io_squeeze_ones() {
     }
 
     {
-      float *output_data = new float[block_sizes.TotalSize()];
+      float* output_data = new float[block_sizes.TotalSize()];
       TensorBlock write_block(0, block_sizes, strides, strides, input_data);
       TensorBlockWriter::Run(write_block, output_data);
       for (int i = 0; i < total_size; ++i) {
@@ -598,11 +609,11 @@ template <int Layout> static void test_block_io_squeeze_ones() {
     const Index total_size = block_sizes.TotalSize();
 
     // Create a random input tensor.
-    float *input_data = GenerateRandomData<float>(total_size);
+    float* input_data = GenerateRandomData<float>(total_size);
     DSizes<Index, 5> strides(ComputeStrides<Layout, 5>(block_sizes));
 
     {
-      float *output_data = new float[block_sizes.TotalSize()];
+      float* output_data = new float[block_sizes.TotalSize()];
       TensorBlock read_block(0, block_sizes, strides, strides, output_data);
       TensorBlockReader::Run(&read_block, input_data);
       for (int i = 0; i < total_size; ++i) {
@@ -612,7 +623,7 @@ template <int Layout> static void test_block_io_squeeze_ones() {
     }
 
     {
-      float *output_data = new float[block_sizes.TotalSize()];
+      float* output_data = new float[block_sizes.TotalSize()];
       TensorBlock write_block(0, block_sizes, strides, strides, input_data);
       TensorBlockWriter::Run(write_block, output_data);
       for (int i = 0; i < total_size; ++i) {
@@ -636,9 +647,9 @@ static void test_block_cwise_unary_io_basic() {
   const Index total_size = block_sizes.TotalSize();
 
   // Create a random input tensors.
-  T *input_data = GenerateRandomData<T>(total_size);
+  T* input_data = GenerateRandomData<T>(total_size);
 
-  T *output_data = new T[total_size];
+  T* output_data = new T[total_size];
   UnaryFunctor functor;
   TensorBlockCwiseUnaryIO::Run(functor, block_sizes, strides, output_data,
                                strides, input_data);
@@ -650,7 +661,8 @@ static void test_block_cwise_unary_io_basic() {
   delete[] output_data;
 }
 
-template <int Layout> static void test_block_cwise_unary_io_squeeze_ones() {
+template <int Layout>
+static void test_block_cwise_unary_io_squeeze_ones() {
   typedef internal::scalar_square_op<float> UnaryFunctor;
   typedef internal::TensorBlockCwiseUnaryIO<UnaryFunctor, Index, float, 5,
                                             Layout>
@@ -662,9 +674,9 @@ template <int Layout> static void test_block_cwise_unary_io_squeeze_ones() {
   const Index total_size = block_sizes.TotalSize();
 
   // Create a random input tensors.
-  float *input_data = GenerateRandomData<float>(total_size);
+  float* input_data = GenerateRandomData<float>(total_size);
 
-  float *output_data = new float[total_size];
+  float* output_data = new float[total_size];
   UnaryFunctor functor;
   TensorBlockCwiseUnaryIO::Run(functor, block_sizes, strides, output_data,
                                strides, input_data);
@@ -676,7 +688,8 @@ template <int Layout> static void test_block_cwise_unary_io_squeeze_ones() {
   delete[] output_data;
 }
 
-template <int Layout> static void test_block_cwise_unary_io_zero_strides() {
+template <int Layout>
+static void test_block_cwise_unary_io_zero_strides() {
   typedef internal::scalar_square_op<float> UnaryFunctor;
   typedef internal::TensorBlockCwiseUnaryIO<UnaryFunctor, Index, float, 5,
                                             Layout>
@@ -695,13 +708,13 @@ template <int Layout> static void test_block_cwise_unary_io_zero_strides() {
   input_strides[4] = 0;
 
   // Generate random data.
-  float *input_data = GenerateRandomData<float>(input_sizes.TotalSize());
+  float* input_data = GenerateRandomData<float>(input_sizes.TotalSize());
 
   DSizes<Index, 5> output_sizes = rnd_dims;
   DSizes<Index, 5> output_strides(ComputeStrides<Layout, 5>(output_sizes));
 
   const Index output_total_size = output_sizes.TotalSize();
-  float *output_data = new float[output_total_size];
+  float* output_data = new float[output_total_size];
 
   UnaryFunctor functor;
   TensorBlockCwiseUnaryIO::Run(functor, output_sizes, output_strides,
@@ -742,10 +755,10 @@ static void test_block_cwise_binary_io_basic() {
   const Index total_size = block_sizes.TotalSize();
 
   // Create a random input tensors.
-  T *left_data = GenerateRandomData<T>(total_size);
-  T *right_data = GenerateRandomData<T>(total_size);
+  T* left_data = GenerateRandomData<T>(total_size);
+  T* right_data = GenerateRandomData<T>(total_size);
 
-  T *output_data = new T[total_size];
+  T* output_data = new T[total_size];
   BinaryFunctor functor;
   TensorBlockCwiseBinaryIO::Run(functor, block_sizes, strides, output_data,
                                 strides, left_data, strides, right_data);
@@ -758,7 +771,8 @@ static void test_block_cwise_binary_io_basic() {
   delete[] output_data;
 }
 
-template <int Layout> static void test_block_cwise_binary_io_squeeze_ones() {
+template <int Layout>
+static void test_block_cwise_binary_io_squeeze_ones() {
   typedef internal::scalar_sum_op<float> BinaryFunctor;
   typedef internal::TensorBlockCwiseBinaryIO<BinaryFunctor, Index, float, 5,
                                              Layout>
@@ -770,10 +784,10 @@ template <int Layout> static void test_block_cwise_binary_io_squeeze_ones() {
   const Index total_size = block_sizes.TotalSize();
 
   // Create a random input tensors.
-  float *left_data = GenerateRandomData<float>(total_size);
-  float *right_data = GenerateRandomData<float>(total_size);
+  float* left_data = GenerateRandomData<float>(total_size);
+  float* right_data = GenerateRandomData<float>(total_size);
 
-  float *output_data = new float[total_size];
+  float* output_data = new float[total_size];
   BinaryFunctor functor;
   TensorBlockCwiseBinaryIO::Run(functor, block_sizes, strides, output_data,
                                 strides, left_data, strides, right_data);
@@ -786,7 +800,8 @@ template <int Layout> static void test_block_cwise_binary_io_squeeze_ones() {
   delete[] output_data;
 }
 
-template <int Layout> static void test_block_cwise_binary_io_zero_strides() {
+template <int Layout>
+static void test_block_cwise_binary_io_zero_strides() {
   typedef internal::scalar_sum_op<float> BinaryFunctor;
   typedef internal::TensorBlockCwiseBinaryIO<BinaryFunctor, Index, float, 5,
                                              Layout>
@@ -813,14 +828,14 @@ template <int Layout> static void test_block_cwise_binary_io_zero_strides() {
   right_strides[3] = 0;
 
   // Generate random data.
-  float *left_data = GenerateRandomData<float>(left_sizes.TotalSize());
-  float *right_data = GenerateRandomData<float>(right_sizes.TotalSize());
+  float* left_data = GenerateRandomData<float>(left_sizes.TotalSize());
+  float* right_data = GenerateRandomData<float>(right_sizes.TotalSize());
 
   DSizes<Index, 5> output_sizes = rnd_dims;
   DSizes<Index, 5> output_strides(ComputeStrides<Layout, 5>(output_sizes));
 
   const Index output_total_size = output_sizes.TotalSize();
-  float *output_data = new float[output_total_size];
+  float* output_data = new float[output_total_size];
 
   BinaryFunctor functor;
   TensorBlockCwiseBinaryIO::Run(functor, output_sizes, output_strides,
@@ -854,7 +869,9 @@ template <int Layout> static void test_block_cwise_binary_io_zero_strides() {
   delete[] output_data;
 }
 
-template <int Layout> static void test_uniform_block_shape() {
+template <int Layout>
+static void test_uniform_block_shape()
+{
   typedef internal::TensorBlock<int, Index, 5, Layout> TensorBlock;
   typedef internal::TensorBlockMapper<int, Index, 5, Layout> TensorBlockMapper;
 
@@ -979,7 +996,9 @@ template <int Layout> static void test_uniform_block_shape() {
   }
 }
 
-template <int Layout> static void test_skewed_inner_dim_block_shape() {
+template <int Layout>
+static void test_skewed_inner_dim_block_shape()
+{
   typedef internal::TensorBlock<int, Index, 5, Layout> TensorBlock;
   typedef internal::TensorBlockMapper<int, Index, 5, Layout> TensorBlockMapper;
 
@@ -1120,15 +1139,15 @@ template <int Layout> static void test_skewed_inner_dim_block_shape() {
 }
 
 template <int Layout>
-static void test_empty_dims(const internal::TensorBlockShapeType block_shape) {
+static void test_empty_dims(const internal::TensorBlockShapeType block_shape)
+{
   // Test blocking of tensors with zero dimensions:
   //  - we must not crash on asserts and divisions by zero
   //  - we must not return block with zero dimensions
   //    (recipe for overflows/underflows, divisions by zero and NaNs later)
   //  - total block count must be zero
   {
-    typedef internal::TensorBlockMapper<int, Index, 1, Layout>
-        TensorBlockMapper;
+    typedef internal::TensorBlockMapper<int, Index, 1, Layout> TensorBlockMapper;
     DSizes<Index, 1> dims(0);
     for (int max_coeff_count = 0; max_coeff_count < 2; ++max_coeff_count) {
       TensorBlockMapper block_mapper(dims, block_shape, max_coeff_count);
@@ -1138,8 +1157,7 @@ static void test_empty_dims(const internal::TensorBlockShapeType block_shape) {
   }
 
   {
-    typedef internal::TensorBlockMapper<int, Index, 2, Layout>
-        TensorBlockMapper;
+    typedef internal::TensorBlockMapper<int, Index, 2, Layout> TensorBlockMapper;
     for (int dim1 = 0; dim1 < 3; ++dim1) {
       for (int dim2 = 0; dim2 < 3; ++dim2) {
         DSizes<Index, 2> dims(dim1, dim2);
@@ -1155,24 +1173,24 @@ static void test_empty_dims(const internal::TensorBlockShapeType block_shape) {
   }
 }
 
-#define TEST_LAYOUTS(NAME)                                                     \
-  CALL_SUBTEST(NAME<ColMajor>());                                              \
+#define TEST_LAYOUTS(NAME) \
+  CALL_SUBTEST(NAME<ColMajor>()); \
   CALL_SUBTEST(NAME<RowMajor>())
 
-#define TEST_LAYOUTS_AND_DIMS(TYPE, NAME)                                      \
-  CALL_SUBTEST((NAME<TYPE, 1, ColMajor>()));                                   \
-  CALL_SUBTEST((NAME<TYPE, 1, RowMajor>()));                                   \
-  CALL_SUBTEST((NAME<TYPE, 2, ColMajor>()));                                   \
-  CALL_SUBTEST((NAME<TYPE, 2, RowMajor>()));                                   \
-  CALL_SUBTEST((NAME<TYPE, 3, ColMajor>()));                                   \
-  CALL_SUBTEST((NAME<TYPE, 3, RowMajor>()));                                   \
-  CALL_SUBTEST((NAME<TYPE, 4, ColMajor>()));                                   \
-  CALL_SUBTEST((NAME<TYPE, 4, RowMajor>()));                                   \
-  CALL_SUBTEST((NAME<TYPE, 5, ColMajor>()));                                   \
+#define TEST_LAYOUTS_AND_DIMS(TYPE, NAME)    \
+  CALL_SUBTEST((NAME<TYPE, 1, ColMajor>())); \
+  CALL_SUBTEST((NAME<TYPE, 1, RowMajor>())); \
+  CALL_SUBTEST((NAME<TYPE, 2, ColMajor>())); \
+  CALL_SUBTEST((NAME<TYPE, 2, RowMajor>())); \
+  CALL_SUBTEST((NAME<TYPE, 3, ColMajor>())); \
+  CALL_SUBTEST((NAME<TYPE, 3, RowMajor>())); \
+  CALL_SUBTEST((NAME<TYPE, 4, ColMajor>())); \
+  CALL_SUBTEST((NAME<TYPE, 4, RowMajor>())); \
+  CALL_SUBTEST((NAME<TYPE, 5, ColMajor>())); \
   CALL_SUBTEST((NAME<TYPE, 5, RowMajor>()))
 
-#define TEST_LAYOUTS_WITH_ARG(NAME, ARG)                                       \
-  CALL_SUBTEST(NAME<ColMajor>(ARG));                                           \
+#define TEST_LAYOUTS_WITH_ARG(NAME, ARG) \
+  CALL_SUBTEST(NAME<ColMajor>(ARG)); \
   CALL_SUBTEST(NAME<RowMajor>(ARG))
 
 EIGEN_DECLARE_TEST(cxx11_tensor_block_access) {

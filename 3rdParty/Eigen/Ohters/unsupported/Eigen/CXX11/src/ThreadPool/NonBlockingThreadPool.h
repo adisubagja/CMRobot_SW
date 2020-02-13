@@ -14,7 +14,7 @@ namespace Eigen {
 
 template <typename Environment>
 class ThreadPoolTempl : public Eigen::ThreadPoolInterface {
-public:
+ public:
   typedef typename Environment::Task Task;
   typedef RunQueue<Task, 1024> Queue;
 
@@ -23,11 +23,18 @@ public:
 
   ThreadPoolTempl(int num_threads, bool allow_spinning,
                   Environment env = Environment())
-      : env_(env), num_threads_(num_threads), allow_spinning_(allow_spinning),
-        thread_data_(num_threads), all_coprimes_(num_threads),
+      : env_(env),
+        num_threads_(num_threads),
+        allow_spinning_(allow_spinning),
+        thread_data_(num_threads),
+        all_coprimes_(num_threads),
         waiters_(num_threads),
-        global_steal_partition_(EncodePartition(0, num_threads_)), blocked_(0),
-        spinning_(0), done_(false), cancelled_(false), ec_(waiters_) {
+        global_steal_partition_(EncodePartition(0, num_threads_)),
+        blocked_(0),
+        spinning_(0),
+        done_(false),
+        cancelled_(false),
+        ec_(waiters_) {
     waiters_.resize(num_threads_);
     // Calculate coprimes of all numbers [1, num_threads].
     // Coprimes are used for random walks over all threads in Steal
@@ -78,14 +85,12 @@ public:
       thread_data_[i].thread.reset();
   }
 
-  void SetStealPartitions(
-      const std::vector<std::pair<unsigned, unsigned>> &partitions) {
-    eigen_plain_assert(partitions.size() ==
-                       static_cast<std::size_t>(num_threads_));
+  void SetStealPartitions(const std::vector<std::pair<unsigned, unsigned>>& partitions) {
+    eigen_plain_assert(partitions.size() == static_cast<std::size_t>(num_threads_));
 
     // Pass this information to each thread queue.
     for (int i = 0; i < num_threads_; i++) {
-      const auto &pair = partitions[i];
+      const auto& pair = partitions[i];
       unsigned start = pair.first, end = pair.second;
       AssertBounds(start, end);
       unsigned val = EncodePartition(start, end);
@@ -100,10 +105,10 @@ public:
   void ScheduleWithHint(std::function<void()> fn, int start,
                         int limit) override {
     Task t = env_.CreateTask(std::move(fn));
-    PerThread *pt = GetPerThread();
+    PerThread* pt = GetPerThread();
     if (pt->pool == this) {
       // Worker thread of this pool, push onto the thread's queue.
-      Queue &q = thread_data_[pt->thread_id].queue;
+      Queue& q = thread_data_[pt->thread_id].queue;
       t = q.PushFront(std::move(t));
     } else {
       // A free-standing thread (or worker of another pool), push onto a random
@@ -113,7 +118,7 @@ public:
       int num_queues = limit - start;
       int rnd = Rand(&pt->rand) % num_queues;
       eigen_plain_assert(start + rnd < limit);
-      Queue &q = thread_data_[start + rnd].queue;
+      Queue& q = thread_data_[start + rnd].queue;
       t = q.PushBack(std::move(t));
     }
     // Note: below we touch this after making w available to worker threads.
@@ -126,7 +131,7 @@ public:
     if (!t.f) {
       ec_.Notify(false);
     } else {
-      env_.ExecuteTask(t); // Push failed, execute directly.
+      env_.ExecuteTask(t);  // Push failed, execute directly.
     }
   }
 
@@ -148,7 +153,7 @@ public:
   int NumThreads() const EIGEN_FINAL { return num_threads_; }
 
   int CurrentThreadId() const EIGEN_FINAL {
-    const PerThread *pt = const_cast<ThreadPoolTempl *>(this)->GetPerThread();
+    const PerThread* pt = const_cast<ThreadPoolTempl*>(this)->GetPerThread();
     if (pt->pool == this) {
       return pt->thread_id;
     } else {
@@ -156,7 +161,7 @@ public:
     }
   }
 
-private:
+ private:
   // Create a single atomic<int> that encodes start and limit information for
   // each thread.
   // We expect num_threads_ < 65536, so we can store them in a single
@@ -171,7 +176,7 @@ private:
     return (start << kMaxPartitionBits) | limit;
   }
 
-  inline void DecodePartition(unsigned val, unsigned *start, unsigned *limit) {
+  inline void DecodePartition(unsigned val, unsigned* start, unsigned* limit) {
     *limit = val & (kMaxThreads - 1);
     val >>= kMaxPartitionBits;
     *start = val;
@@ -179,7 +184,7 @@ private:
 
   void AssertBounds(int start, int end) {
     eigen_plain_assert(start >= 0);
-    eigen_plain_assert(start < end); // non-zero sized partition
+    eigen_plain_assert(start < end);  // non-zero sized partition
     eigen_plain_assert(end <= num_threads_);
   }
 
@@ -191,7 +196,7 @@ private:
     return thread_data_[i].steal_partition.load(std::memory_order_relaxed);
   }
 
-  void ComputeCoprimes(int N, MaxSizeVector<unsigned> *coprimes) {
+  void ComputeCoprimes(int N, MaxSizeVector<unsigned>* coprimes) {
     for (int i = 1; i <= N; i++) {
       unsigned a = i;
       unsigned b = N;
@@ -211,9 +216,9 @@ private:
 
   struct PerThread {
     constexpr PerThread() : pool(NULL), rand(0), thread_id(-1) {}
-    ThreadPoolTempl *pool; // Parent pool, or null for normal threads.
-    uint64_t rand;         // Random generator state.
-    int thread_id;         // Worker thread index in pool.
+    ThreadPoolTempl* pool;  // Parent pool, or null for normal threads.
+    uint64_t rand;          // Random generator state.
+    int thread_id;          // Worker thread index in pool.
 #ifndef EIGEN_THREAD_LOCAL
     // Prevent false sharing.
     char pad_[128];
@@ -241,7 +246,7 @@ private:
   EventCount ec_;
 #ifndef EIGEN_THREAD_LOCAL
   std::unique_ptr<Barrier> init_barrier_;
-  std::mutex per_thread_map_mutex_; // Protects per_thread_map_.
+  std::mutex per_thread_map_mutex_;  // Protects per_thread_map_.
   std::unordered_map<uint64_t, std::unique_ptr<PerThread>> per_thread_map_;
 #endif
 
@@ -250,19 +255,17 @@ private:
 #ifndef EIGEN_THREAD_LOCAL
     std::unique_ptr<PerThread> new_pt(new PerThread());
     per_thread_map_mutex_.lock();
-    eigen_plain_assert(
-        per_thread_map_.emplace(GlobalThreadIdHash(), std::move(new_pt))
-            .second);
+    eigen_plain_assert(per_thread_map_.emplace(GlobalThreadIdHash(), std::move(new_pt)).second);
     per_thread_map_mutex_.unlock();
     init_barrier_->Notify();
     init_barrier_->Wait();
 #endif
-    PerThread *pt = GetPerThread();
+    PerThread* pt = GetPerThread();
     pt->pool = this;
     pt->rand = GlobalThreadIdHash();
     pt->thread_id = thread_id;
-    Queue &q = thread_data_[thread_id].queue;
-    EventCount::Waiter *waiter = &waiters_[thread_id];
+    Queue& q = thread_data_[thread_id].queue;
+    EventCount::Waiter* waiter = &waiters_[thread_id];
     // TODO(dvyukov,rmlarsen): The time spent in NonEmptyQueueIndex() is
     // proportional to num_threads_ and we assume that new work is scheduled at
     // a constant rate, so we set spin_count to 5000 / num_threads_. The
@@ -329,7 +332,7 @@ private:
   // Steal tries to steal work from other worker threads in the range [start,
   // limit) in best-effort manner.
   Task Steal(unsigned start, unsigned limit) {
-    PerThread *pt = GetPerThread();
+    PerThread* pt = GetPerThread();
     const size_t size = limit - start;
     unsigned r = Rand(&pt->rand);
     unsigned victim = r % size;
@@ -351,12 +354,11 @@ private:
 
   // Steals work within threads belonging to the partition.
   Task LocalSteal() {
-    PerThread *pt = GetPerThread();
+    PerThread* pt = GetPerThread();
     unsigned partition = GetStealPartition(pt->thread_id);
     // If thread steal partition is the same as global partition, there is no
     // need to go through the steal loop twice.
-    if (global_steal_partition_ == partition)
-      return Task();
+    if (global_steal_partition_ == partition) return Task();
     unsigned start, limit;
     DecodePartition(partition, &start, &limit);
     AssertBounds(start, limit);
@@ -365,12 +367,15 @@ private:
   }
 
   // Steals work from any other thread in the pool.
-  Task GlobalSteal() { return Steal(0, num_threads_); }
+  Task GlobalSteal() {
+    return Steal(0, num_threads_);
+  }
+
 
   // WaitForWork blocks until new work is available (returns true), or if it is
   // time to exit (returns false). Can optionally return a task to execute in t
   // (in such case t.f != nullptr on return).
-  bool WaitForWork(EventCount::Waiter *waiter, Task *t) {
+  bool WaitForWork(EventCount::Waiter* waiter, Task* t) {
     eigen_plain_assert(!t->f);
     // We already did best-effort emptiness check in Steal, so prepare for
     // blocking.
@@ -418,7 +423,7 @@ private:
   }
 
   int NonEmptyQueueIndex() {
-    PerThread *pt = GetPerThread();
+    PerThread* pt = GetPerThread();
     // We intentionally design NonEmptyQueueIndex to steal work from
     // anywhere in the queue so threads don't block in WaitForWork() forever
     // when all threads in their partition go to sleep. Steal is still local.
@@ -442,7 +447,7 @@ private:
     return std::hash<std::thread::id>()(std::this_thread::get_id());
   }
 
-  EIGEN_STRONG_INLINE PerThread *GetPerThread() {
+  EIGEN_STRONG_INLINE PerThread* GetPerThread() {
 #ifndef EIGEN_THREAD_LOCAL
     static PerThread dummy;
     auto it = per_thread_map_.find(GlobalThreadIdHash());
@@ -453,12 +458,12 @@ private:
     }
 #else
     EIGEN_THREAD_LOCAL PerThread per_thread_;
-    PerThread *pt = &per_thread_;
+    PerThread* pt = &per_thread_;
     return pt;
 #endif
   }
 
-  static EIGEN_STRONG_INLINE unsigned Rand(uint64_t *state) {
+  static EIGEN_STRONG_INLINE unsigned Rand(uint64_t* state) {
     uint64_t current = *state;
     // Update the internal state
     *state = current * 6364136223846793005ULL + 0xda3e39cb94b95bdbULL;
@@ -470,6 +475,6 @@ private:
 
 typedef ThreadPoolTempl<StlThreadEnvironment> ThreadPool;
 
-} // namespace Eigen
+}  // namespace Eigen
 
-#endif // EIGEN_CXX11_THREADPOOL_NONBLOCKING_THREAD_POOL_H
+#endif  // EIGEN_CXX11_THREADPOOL_NONBLOCKING_THREAD_POOL_H

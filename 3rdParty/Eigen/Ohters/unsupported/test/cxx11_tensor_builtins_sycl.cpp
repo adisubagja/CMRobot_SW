@@ -30,7 +30,7 @@ template <typename T> T rsqrt(T x) { return 1 / std::sqrt(x); }
 template <typename T> T square(T x) { return x * x; }
 template <typename T> T cube(T x) { return x * x * x; }
 template <typename T> T inverse(T x) { return 1 / x; }
-} // namespace std
+}
 
 #define TEST_UNARY_BUILTINS_FOR_SCALAR(FUNC, SCALAR, OPERATOR, Layout)         \
   {                                                                            \
@@ -44,9 +44,8 @@ template <typename T> T inverse(T x) { return 1 / x; }
         sycl_device.allocate(in.size() * sizeof(SCALAR)));                     \
     SCALAR *gpu_data_out = static_cast<SCALAR *>(                              \
         sycl_device.allocate(out.size() * sizeof(SCALAR)));                    \
-    TensorMap<Tensor<SCALAR, 3, Layout, int64_t>> gpu(gpu_data, tensorRange);  \
-    TensorMap<Tensor<SCALAR, 3, Layout, int64_t>> gpu_out(gpu_data_out,        \
-                                                          tensorRange);        \
+    TensorMap<Tensor<SCALAR, 3, Layout, int64_t>> gpu(gpu_data, tensorRange);          \
+    TensorMap<Tensor<SCALAR, 3, Layout, int64_t>> gpu_out(gpu_data_out, tensorRange);  \
     sycl_device.memcpyHostToDevice(gpu_data, in.data(),                        \
                                    (in.size()) * sizeof(SCALAR));              \
     sycl_device.memcpyHostToDevice(gpu_data_out, out.data(),                   \
@@ -69,8 +68,7 @@ template <typename T> T inverse(T x) { return 1 / x; }
     Tensor<SCALAR, 3, Layout, int64_t> reference(out);                         \
     SCALAR *gpu_data_out = static_cast<SCALAR *>(                              \
         sycl_device.allocate(out.size() * sizeof(SCALAR)));                    \
-    TensorMap<Tensor<SCALAR, 3, Layout, int64_t>> gpu_out(gpu_data_out,        \
-                                                          tensorRange);        \
+    TensorMap<Tensor<SCALAR, 3, Layout, int64_t>> gpu_out(gpu_data_out, tensorRange);  \
     sycl_device.memcpyHostToDevice(gpu_data_out, out.data(),                   \
                                    (out.size()) * sizeof(SCALAR));             \
     gpu_out.device(sycl_device) OPERATOR gpu_out.FUNC();                       \
@@ -84,22 +82,22 @@ template <typename T> T inverse(T x) { return 1 / x; }
     sycl_device.deallocate(gpu_data_out);                                      \
   }
 
-#define TEST_UNARY_BUILTINS_OPERATOR(SCALAR, OPERATOR, Layout)                 \
-  TEST_UNARY_BUILTINS_FOR_SCALAR(abs, SCALAR, OPERATOR, Layout)                \
-  TEST_UNARY_BUILTINS_FOR_SCALAR(sqrt, SCALAR, OPERATOR, Layout)               \
-  TEST_UNARY_BUILTINS_FOR_SCALAR(rsqrt, SCALAR, OPERATOR, Layout)              \
-  TEST_UNARY_BUILTINS_FOR_SCALAR(square, SCALAR, OPERATOR, Layout)             \
-  TEST_UNARY_BUILTINS_FOR_SCALAR(cube, SCALAR, OPERATOR, Layout)               \
-  TEST_UNARY_BUILTINS_FOR_SCALAR(inverse, SCALAR, OPERATOR, Layout)            \
-  TEST_UNARY_BUILTINS_FOR_SCALAR(tanh, SCALAR, OPERATOR, Layout)               \
-  TEST_UNARY_BUILTINS_FOR_SCALAR(exp, SCALAR, OPERATOR, Layout)                \
-  TEST_UNARY_BUILTINS_FOR_SCALAR(expm1, SCALAR, OPERATOR, Layout)              \
-  TEST_UNARY_BUILTINS_FOR_SCALAR(log, SCALAR, OPERATOR, Layout)                \
-  TEST_UNARY_BUILTINS_FOR_SCALAR(abs, SCALAR, OPERATOR, Layout)                \
-  TEST_UNARY_BUILTINS_FOR_SCALAR(ceil, SCALAR, OPERATOR, Layout)               \
-  TEST_UNARY_BUILTINS_FOR_SCALAR(floor, SCALAR, OPERATOR, Layout)              \
-  TEST_UNARY_BUILTINS_FOR_SCALAR(round, SCALAR, OPERATOR, Layout)              \
-  TEST_UNARY_BUILTINS_FOR_SCALAR(log1p, SCALAR, OPERATOR, Layout)
+#define TEST_UNARY_BUILTINS_OPERATOR(SCALAR, OPERATOR , Layout)                \
+  TEST_UNARY_BUILTINS_FOR_SCALAR(abs, SCALAR, OPERATOR , Layout)               \
+  TEST_UNARY_BUILTINS_FOR_SCALAR(sqrt, SCALAR, OPERATOR , Layout)              \
+  TEST_UNARY_BUILTINS_FOR_SCALAR(rsqrt, SCALAR, OPERATOR , Layout)             \
+  TEST_UNARY_BUILTINS_FOR_SCALAR(square, SCALAR, OPERATOR , Layout)            \
+  TEST_UNARY_BUILTINS_FOR_SCALAR(cube, SCALAR, OPERATOR , Layout)              \
+  TEST_UNARY_BUILTINS_FOR_SCALAR(inverse, SCALAR, OPERATOR , Layout)           \
+  TEST_UNARY_BUILTINS_FOR_SCALAR(tanh, SCALAR, OPERATOR , Layout)              \
+  TEST_UNARY_BUILTINS_FOR_SCALAR(exp, SCALAR, OPERATOR , Layout)               \
+  TEST_UNARY_BUILTINS_FOR_SCALAR(expm1, SCALAR, OPERATOR , Layout)             \
+  TEST_UNARY_BUILTINS_FOR_SCALAR(log, SCALAR, OPERATOR , Layout)               \
+  TEST_UNARY_BUILTINS_FOR_SCALAR(abs, SCALAR, OPERATOR , Layout)               \
+  TEST_UNARY_BUILTINS_FOR_SCALAR(ceil, SCALAR, OPERATOR , Layout)              \
+  TEST_UNARY_BUILTINS_FOR_SCALAR(floor, SCALAR, OPERATOR , Layout)             \
+  TEST_UNARY_BUILTINS_FOR_SCALAR(round, SCALAR, OPERATOR , Layout)             \
+  TEST_UNARY_BUILTINS_FOR_SCALAR(log1p, SCALAR, OPERATOR , Layout)
 
 #define TEST_IS_THAT_RETURNS_BOOL(SCALAR, FUNC, Layout)                        \
   {                                                                            \
@@ -111,9 +109,8 @@ template <typename T> T inverse(T x) { return 1 / x; }
         sycl_device.allocate(in.size() * sizeof(SCALAR)));                     \
     bool *gpu_data_out =                                                       \
         static_cast<bool *>(sycl_device.allocate(out.size() * sizeof(bool)));  \
-    TensorMap<Tensor<SCALAR, 3, Layout, int64_t>> gpu(gpu_data, tensorRange);  \
-    TensorMap<Tensor<bool, 3, Layout, int64_t>> gpu_out(gpu_data_out,          \
-                                                        tensorRange);          \
+    TensorMap<Tensor<SCALAR, 3, Layout, int64_t>> gpu(gpu_data, tensorRange);          \
+    TensorMap<Tensor<bool, 3, Layout, int64_t>> gpu_out(gpu_data_out, tensorRange);    \
     sycl_device.memcpyHostToDevice(gpu_data, in.data(),                        \
                                    (in.size()) * sizeof(SCALAR));              \
     gpu_out.device(sycl_device) = gpu.FUNC();                                  \
@@ -146,7 +143,7 @@ static void test_builtin_unary_sycl(const Eigen::SyclDevice &sycl_device) {
 namespace std {
 template <typename T> T cwiseMax(T x, T y) { return std::max(x, y); }
 template <typename T> T cwiseMin(T x, T y) { return std::min(x, y); }
-} // namespace std
+}
 
 #define TEST_BINARY_BUILTINS_FUNC(SCALAR, FUNC, Layout)                        \
   {                                                                            \
@@ -163,12 +160,9 @@ template <typename T> T cwiseMin(T x, T y) { return std::min(x, y); }
         sycl_device.allocate(in_2.size() * sizeof(SCALAR)));                   \
     SCALAR *gpu_data_out = static_cast<SCALAR *>(                              \
         sycl_device.allocate(out.size() * sizeof(SCALAR)));                    \
-    TensorMap<Tensor<SCALAR, 3, Layout, int64_t>> gpu_1(gpu_data_1,            \
-                                                        tensorRange);          \
-    TensorMap<Tensor<SCALAR, 3, Layout, int64_t>> gpu_2(gpu_data_2,            \
-                                                        tensorRange);          \
-    TensorMap<Tensor<SCALAR, 3, Layout, int64_t>> gpu_out(gpu_data_out,        \
-                                                          tensorRange);        \
+    TensorMap<Tensor<SCALAR, 3, Layout, int64_t>> gpu_1(gpu_data_1, tensorRange);      \
+    TensorMap<Tensor<SCALAR, 3, Layout, int64_t>> gpu_2(gpu_data_2, tensorRange);      \
+    TensorMap<Tensor<SCALAR, 3, Layout, int64_t>> gpu_out(gpu_data_out, tensorRange);  \
     sycl_device.memcpyHostToDevice(gpu_data_1, in_1.data(),                    \
                                    (in_1.size()) * sizeof(SCALAR));            \
     sycl_device.memcpyHostToDevice(gpu_data_2, in_2.data(),                    \
@@ -201,12 +195,9 @@ template <typename T> T cwiseMin(T x, T y) { return std::min(x, y); }
         sycl_device.allocate(in_2.size() * sizeof(SCALAR)));                   \
     SCALAR *gpu_data_out = static_cast<SCALAR *>(                              \
         sycl_device.allocate(out.size() * sizeof(SCALAR)));                    \
-    TensorMap<Tensor<SCALAR, 3, Layout, int64_t>> gpu_1(gpu_data_1,            \
-                                                        tensorRange);          \
-    TensorMap<Tensor<SCALAR, 3, Layout, int64_t>> gpu_2(gpu_data_2,            \
-                                                        tensorRange);          \
-    TensorMap<Tensor<SCALAR, 3, Layout, int64_t>> gpu_out(gpu_data_out,        \
-                                                          tensorRange);        \
+    TensorMap<Tensor<SCALAR, 3, Layout, int64_t>> gpu_1(gpu_data_1, tensorRange);      \
+    TensorMap<Tensor<SCALAR, 3, Layout, int64_t>> gpu_2(gpu_data_2, tensorRange);      \
+    TensorMap<Tensor<SCALAR, 3, Layout, int64_t>> gpu_out(gpu_data_out, tensorRange);  \
     sycl_device.memcpyHostToDevice(gpu_data_1, in_1.data(),                    \
                                    (in_1.size()) * sizeof(SCALAR));            \
     sycl_device.memcpyHostToDevice(gpu_data_2, in_2.data(),                    \
@@ -222,8 +213,7 @@ template <typename T> T cwiseMin(T x, T y) { return std::min(x, y); }
     sycl_device.deallocate(gpu_data_out);                                      \
   }
 
-#define TEST_BINARY_BUILTINS_OPERATORS_THAT_TAKES_SCALAR(SCALAR, OPERATOR,     \
-                                                         Layout)               \
+#define TEST_BINARY_BUILTINS_OPERATORS_THAT_TAKES_SCALAR(SCALAR, OPERATOR, Layout)     \
   {                                                                            \
     /* out = in_1 OPERATOR 2 */                                                \
     Tensor<SCALAR, 3, Layout, int64_t> in_1(tensorRange);                      \
@@ -234,10 +224,8 @@ template <typename T> T cwiseMin(T x, T y) { return std::min(x, y); }
         sycl_device.allocate(in_1.size() * sizeof(SCALAR)));                   \
     SCALAR *gpu_data_out = static_cast<SCALAR *>(                              \
         sycl_device.allocate(out.size() * sizeof(SCALAR)));                    \
-    TensorMap<Tensor<SCALAR, 3, Layout, int64_t>> gpu_1(gpu_data_1,            \
-                                                        tensorRange);          \
-    TensorMap<Tensor<SCALAR, 3, Layout, int64_t>> gpu_out(gpu_data_out,        \
-                                                          tensorRange);        \
+    TensorMap<Tensor<SCALAR, 3, Layout, int64_t>> gpu_1(gpu_data_1, tensorRange);      \
+    TensorMap<Tensor<SCALAR, 3, Layout, int64_t>> gpu_out(gpu_data_out, tensorRange);  \
     sycl_device.memcpyHostToDevice(gpu_data_1, in_1.data(),                    \
                                    (in_1.size()) * sizeof(SCALAR));            \
     gpu_out.device(sycl_device) = gpu_1 OPERATOR 2;                            \
@@ -251,12 +239,12 @@ template <typename T> T cwiseMin(T x, T y) { return std::min(x, y); }
   }
 
 #define TEST_BINARY_BUILTINS(SCALAR, Layout)                                   \
-  TEST_BINARY_BUILTINS_FUNC(SCALAR, cwiseMax, Layout)                          \
-  TEST_BINARY_BUILTINS_FUNC(SCALAR, cwiseMin, Layout)                          \
-  TEST_BINARY_BUILTINS_OPERATORS(SCALAR, +, Layout)                            \
-  TEST_BINARY_BUILTINS_OPERATORS(SCALAR, -, Layout)                            \
-  TEST_BINARY_BUILTINS_OPERATORS(SCALAR, *, Layout)                            \
-  TEST_BINARY_BUILTINS_OPERATORS(SCALAR, /, Layout)
+  TEST_BINARY_BUILTINS_FUNC(SCALAR, cwiseMax , Layout)                         \
+  TEST_BINARY_BUILTINS_FUNC(SCALAR, cwiseMin , Layout)                         \
+  TEST_BINARY_BUILTINS_OPERATORS(SCALAR, + , Layout)                           \
+  TEST_BINARY_BUILTINS_OPERATORS(SCALAR, - , Layout)                           \
+  TEST_BINARY_BUILTINS_OPERATORS(SCALAR, * , Layout)                           \
+  TEST_BINARY_BUILTINS_OPERATORS(SCALAR, / , Layout)
 
 static void test_builtin_binary_sycl(const Eigen::SyclDevice &sycl_device) {
   int64_t sizeDim1 = 10;
@@ -270,7 +258,7 @@ static void test_builtin_binary_sycl(const Eigen::SyclDevice &sycl_device) {
 }
 
 EIGEN_DECLARE_TEST(cxx11_tensor_builtins_sycl) {
-  for (const auto &device : Eigen::get_sycl_supported_devices()) {
+  for (const auto& device :Eigen::get_sycl_supported_devices()) {
     QueueInterface queueInterface(device);
     Eigen::SyclDevice sycl_device(&queueInterface);
     CALL_SUBTEST(test_builtin_unary_sycl(sycl_device));

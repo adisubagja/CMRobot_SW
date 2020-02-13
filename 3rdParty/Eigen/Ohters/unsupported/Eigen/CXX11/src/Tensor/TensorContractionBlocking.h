@@ -10,74 +10,74 @@
 #ifndef EIGEN_CXX11_TENSOR_TENSOR_CONTRACTION_BLOCKING_H
 #define EIGEN_CXX11_TENSOR_TENSOR_CONTRACTION_BLOCKING_H
 
+
 namespace Eigen {
 namespace internal {
 
-enum { ShardByRow = 0, ShardByCol = 1 };
+enum {
+  ShardByRow = 0,
+  ShardByCol = 1
+};
+
 
 // Default Blocking Strategy
-template <typename ResScalar, typename LhsScalar, typename RhsScalar,
-          typename StorageIndex, int ShardingType = ShardByCol>
+template<typename ResScalar, typename LhsScalar, typename RhsScalar, typename StorageIndex, int ShardingType = ShardByCol>
 class TensorContractionBlocking {
-public:
-  /*
-    adding EIGEN_DEVICE_FUNC unconditionally to 'TensorContractionBlocking'
-    constructor in `TensorContractionBlocking.h` requires adding
-    EIGEN_DEVICE_FUNC to `computeProductBlockingSizes` in
-    `GeneralBlockPanelKernel.h` which in turn, requires adding EIGEN_DEVICE_FUNC
-    to `evaluateProductBlockingSizesHeuristic` in `GeneralBlockPanelKernel.h`
-      which in turn, requires adding EIGEN_DEVICE_FUNC to `manage_caching_sizes`
-    in `GeneralBlockPanelKernel.h` (else HIPCC will error out)
+ public:
 
-    However adding EIGEN_DEVICE_FUNC to `manage_caching_sizes` in
-    `GeneralBlockPanelKernel.h` results in NVCC erroring out with the following
-    error
+ /*
+   adding EIGEN_DEVICE_FUNC unconditionally to 'TensorContractionBlocking' constructor in `TensorContractionBlocking.h`
+     requires adding EIGEN_DEVICE_FUNC to `computeProductBlockingSizes` in `GeneralBlockPanelKernel.h`
+     which in turn, requires adding EIGEN_DEVICE_FUNC to `evaluateProductBlockingSizesHeuristic` in `GeneralBlockPanelKernel.h`
+     which in turn, requires adding EIGEN_DEVICE_FUNC to `manage_caching_sizes` in `GeneralBlockPanelKernel.h`
+     (else HIPCC will error out)
 
-    ../Eigen/src/Core/products/GeneralBlockPanelKernel.h(57): error #2901:
-       dynamic initialization is not supported for function-scope static
-    variables within a __device__/__global__ function
-  */
+   However adding EIGEN_DEVICE_FUNC to `manage_caching_sizes` in `GeneralBlockPanelKernel.h`
+   results in NVCC erroring out with the following error
 
-#if !defined(EIGEN_HIPCC)
+   ../Eigen/src/Core/products/GeneralBlockPanelKernel.h(57): error #2901:
+      dynamic initialization is not supported for function-scope static variables within a __device__/__global__ function
+ */
+
+  #if !defined(EIGEN_HIPCC)
   EIGEN_DEVICE_FUNC
-#endif
-  TensorContractionBlocking(StorageIndex k, StorageIndex m, StorageIndex n,
-                            StorageIndex num_threads = 1)
-      : kc_(k), mc_(m), nc_(n) {
+  #endif
+ TensorContractionBlocking(StorageIndex k, StorageIndex m, StorageIndex n, StorageIndex num_threads = 1) :
+      kc_(k), mc_(m), nc_(n)
+  {
     if (ShardingType == ShardByCol) {
-      computeProductBlockingSizes<LhsScalar, RhsScalar, 1>(kc_, mc_, nc_,
-                                                           num_threads);
-    } else {
-      computeProductBlockingSizes<LhsScalar, RhsScalar, 1>(kc_, nc_, mc_,
-                                                           num_threads);
+      computeProductBlockingSizes<LhsScalar, RhsScalar, 1>(kc_, mc_, nc_, num_threads);
+    }
+    else {
+      computeProductBlockingSizes<LhsScalar, RhsScalar, 1>(kc_, nc_, mc_, num_threads);
     }
 
     const int rhs_packet_size = internal::packet_traits<RhsScalar>::size;
-    kc_ = (rhs_packet_size <= 8 || kc_ <= rhs_packet_size)
-              ? kc_
-              : (kc_ / rhs_packet_size) * rhs_packet_size;
+    kc_ = (rhs_packet_size <= 8 || kc_ <= rhs_packet_size) ?
+      kc_ : (kc_ / rhs_packet_size) * rhs_packet_size;
   }
 
   EIGEN_DEVICE_FUNC EIGEN_ALWAYS_INLINE StorageIndex kc() const { return kc_; }
   EIGEN_DEVICE_FUNC EIGEN_ALWAYS_INLINE StorageIndex mc() const { return mc_; }
   EIGEN_DEVICE_FUNC EIGEN_ALWAYS_INLINE StorageIndex nc() const { return nc_; }
 
-private:
+ private:
   StorageIndex kc_;
   StorageIndex mc_;
   StorageIndex nc_;
 };
 
+
+
 #if defined(EIGEN_USE_LIBXSMM)
 template <typename LhsScalar, typename RhsScalar, typename StorageIndex>
 class TensorXsmmContractionBlocking {
-public:
+ public:
   TensorXsmmContractionBlocking(StorageIndex k, StorageIndex m, StorageIndex n,
-                                size_t max_num_threads = 1,
-                                bool transposeA = false,
-                                bool transposeB = false)
-      : k_(k), m_(m), n_(n), transposeA_(transposeA), transposeB_(transposeB),
-        num_threads_(max_num_threads) {
+      size_t max_num_threads = 1, bool transposeA = false,
+      bool transposeB = false):
+    k_(k), m_(m), n_(n), transposeA_(transposeA),
+    transposeB_(transposeB), num_threads_(max_num_threads) {
 #ifdef EIGEN_TEST_SPECIFIC_BLOCKING_SIZES
     if (EIGEN_TEST_SPECIFIC_BLOCKING_SIZES) {
       mc_ = EIGEN_TEST_SPECIFIC_BLOCKING_SIZE_M;
@@ -99,26 +99,17 @@ public:
 
     // If the matrix is small enough, don't do blocking, just call single xsmm
     // kernel.
-    if (static_cast<double>(m) * k * n <= LIBXSMM_THRESHOLD) {
-      mc_ = m;
-      kc_ = k;
-      nc_ = n;
-      outer_m_ = m;
-      outer_k_ = k;
-      outer_n_ = n;
-      copyA_ = false;
-      copyB_ = false;
+    if (static_cast<double>(m)*k*n <= LIBXSMM_THRESHOLD) {
+      mc_ = m; kc_ = k; nc_ = n;
+      outer_m_ = m; outer_k_ = k; outer_n_ = n;
+      copyA_ = false; copyB_ = false;
     } else {
       int arch = libxsmm_cpuid_x86();
 
       if (arch == LIBXSMM_X86_AVX512_CORE) {
         // skylake
-        mc_ = 64;
-        kc_ = 64;
-        nc_ = 24;
-        outer_m_ = 512;
-        outer_k_ = 512;
-        outer_n_ = 24 * 22;
+        mc_ = 64; kc_ = 64; nc_ = 24;
+        outer_m_ = 512; outer_k_ = 512; outer_n_ = 24*22;
         // Hack to use this kernel architecture as the other one has performance
         // issues (no hardware prefetching).
         // TODO(nishantpatil): This should be removed if the issues are fixed,
@@ -126,28 +117,16 @@ public:
         setenv("LIBXSMM_AVX512_CLASSIC_GEMM", "1", 1);
       } else if (arch == LIBXSMM_X86_AVX2) {
         // haswell
-        mc_ = 32;
-        kc_ = 192;
-        nc_ = 33;
-        outer_m_ = 512;
-        outer_k_ = 3 * 192;
-        outer_n_ = 33 * 16;
+        mc_ = 32; kc_ = 192; nc_ = 33;
+        outer_m_ = 512; outer_k_ = 3*192; outer_n_ = 33*16;
       } else if (arch == LIBXSMM_X86_AVX) {
         // ivybridge
-        mc_ = 32;
-        kc_ = 192;
-        nc_ = 48;
-        outer_m_ = 512;
-        outer_k_ = 3 * 192;
-        outer_n_ = 48 * 11;
+        mc_ = 32; kc_ = 192; nc_ = 48;
+        outer_m_ = 512; outer_k_ = 3*192; outer_n_ = 48*11;
       } else {
         // generic kernel size, usually performing well
-        mc_ = 32;
-        kc_ = 128;
-        nc_ = 32;
-        outer_m_ = 512;
-        outer_k_ = 512;
-        outer_n_ = 512;
+        mc_ = 32; kc_ = 128; nc_ = 32;
+        outer_m_ = 512; outer_k_ = 512; outer_n_ = 512;
       }
 
       // Only copy if it makes the stride smaller.
@@ -178,8 +157,8 @@ public:
     }
     size_t parallelism = numext::maxi(compute_parallelism, pack_parallelism);
 
-    num_threads_ =
-        numext::mini<size_t>(num_threads_, parallelism / MIN_JOBS_PER_THREAD);
+    num_threads_ = numext::mini<size_t>(num_threads_,
+                                    parallelism / MIN_JOBS_PER_THREAD);
     num_threads_ = numext::maxi<size_t>(num_threads_, 1);
 
     // For optimal performance outer block sizes should be multiplies of kernel
@@ -207,7 +186,7 @@ public:
     return prefetch_;
   }
 
-private:
+ private:
   StorageIndex k_, m_, n_;
   StorageIndex kc_, mc_, nc_;
   StorageIndex outer_k_, outer_m_, outer_n_;
@@ -215,7 +194,7 @@ private:
   size_t num_threads_;
 
   // Threshold for m*k*n to skip blocking and just call libxsmm
-  const double LIBXSMM_THRESHOLD = 80 * 80 * 80;
+  const double LIBXSMM_THRESHOLD = 80*80*80;
   // For computing optimal number of threads - so that each thread gets at least
   // that many jobs.
   const double MIN_JOBS_PER_THREAD = 3;

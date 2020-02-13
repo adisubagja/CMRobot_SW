@@ -18,9 +18,10 @@
 
 #else
 
-#if EIGEN_MAX_CPP_VER >= 11 &&                                                 \
-    ((EIGEN_COMP_GNUC && EIGEN_GNUC_AT_LEAST(4, 8)) ||                         \
-     __has_feature(cxx_thread_local) || (EIGEN_COMP_MSVC >= 1900))
+#if EIGEN_MAX_CPP_VER >= 11 &&                         \
+    ((EIGEN_COMP_GNUC && EIGEN_GNUC_AT_LEAST(4, 8)) || \
+     __has_feature(cxx_thread_local)                || \
+     (EIGEN_COMP_MSVC >= 1900) )
 #define EIGEN_THREAD_LOCAL static thread_local
 #endif
 
@@ -33,8 +34,8 @@
 #endif
 // Checks whether C++11's `thread_local` storage duration specifier is
 // supported.
-#if defined(__apple_build_version__) &&                                        \
-    ((__apple_build_version__ < 8000042) ||                                    \
+#if defined(__apple_build_version__) &&     \
+    ((__apple_build_version__ < 8000042) || \
      (TARGET_OS_IPHONE && __IPHONE_OS_VERSION_MIN_REQUIRED < __IPHONE_9_0))
 // Notes: Xcode's clang did not support `thread_local` until version
 // 8, and even then not for all iOS < 9.0.
@@ -51,14 +52,14 @@
 // e.g. `-D__NDK_MAJOR__=11 -D__NKD_MINOR__=0` for NDK r11.
 #if __has_include(<android/ndk-version.h>)
 #include <android/ndk-version.h>
-#endif // __has_include(<android/ndk-version.h>)
-#if defined(__ANDROID__) && defined(__clang__) && defined(__NDK_MAJOR__) &&    \
-    defined(__NDK_MINOR__) &&                                                  \
+#endif  // __has_include(<android/ndk-version.h>)
+#if defined(__ANDROID__) && defined(__clang__) && defined(__NDK_MAJOR__) && \
+    defined(__NDK_MINOR__) &&                                               \
     ((__NDK_MAJOR__ < 12) || ((__NDK_MAJOR__ == 12) && (__NDK_MINOR__ < 1)))
 #undef EIGEN_THREAD_LOCAL
 #endif
-#endif // defined(__ANDROID__) && defined(__clang__)
+#endif  // defined(__ANDROID__) && defined(__clang__)
 
 #endif // EIGEN_AVOID_THREAD_LOCAL
 
-#endif // EIGEN_CXX11_THREADPOOL_THREAD_LOCAL_H
+#endif  // EIGEN_CXX11_THREADPOOL_THREAD_LOCAL_H

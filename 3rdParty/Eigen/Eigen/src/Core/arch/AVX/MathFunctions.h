@@ -20,19 +20,19 @@ namespace internal {
 
 template <>
 EIGEN_DEFINE_FUNCTION_ALLOWING_MULTIPLE_DEFINITIONS EIGEN_UNUSED Packet8f
-psin<Packet8f>(const Packet8f &_x) {
+psin<Packet8f>(const Packet8f& _x) {
   return psin_float(_x);
 }
 
 template <>
 EIGEN_DEFINE_FUNCTION_ALLOWING_MULTIPLE_DEFINITIONS EIGEN_UNUSED Packet8f
-pcos<Packet8f>(const Packet8f &_x) {
+pcos<Packet8f>(const Packet8f& _x) {
   return pcos_float(_x);
 }
 
 template <>
 EIGEN_DEFINE_FUNCTION_ALLOWING_MULTIPLE_DEFINITIONS EIGEN_UNUSED Packet8f
-plog<Packet8f>(const Packet8f &_x) {
+plog<Packet8f>(const Packet8f& _x) {
   return plog_float(_x);
 }
 
@@ -41,20 +41,20 @@ plog<Packet8f>(const Packet8f &_x) {
 // "exp(x) = 2^m*exp(r)" where exp(r) is in the range [-1,1).
 template <>
 EIGEN_DEFINE_FUNCTION_ALLOWING_MULTIPLE_DEFINITIONS EIGEN_UNUSED Packet8f
-pexp<Packet8f>(const Packet8f &_x) {
+pexp<Packet8f>(const Packet8f& _x) {
   return pexp_float(_x);
 }
 
 // Hyperbolic Tangent function.
 template <>
 EIGEN_DEFINE_FUNCTION_ALLOWING_MULTIPLE_DEFINITIONS EIGEN_UNUSED Packet8f
-ptanh<Packet8f>(const Packet8f &x) {
+ptanh<Packet8f>(const Packet8f& x) {
   return internal::generic_fast_tanh_float(x);
 }
 
 template <>
 EIGEN_DEFINE_FUNCTION_ALLOWING_MULTIPLE_DEFINITIONS EIGEN_UNUSED Packet4d
-pexp<Packet4d>(const Packet4d &x) {
+pexp<Packet4d>(const Packet4d& x) {
   return pexp_double(x);
 }
 
@@ -69,7 +69,7 @@ pexp<Packet4d>(const Packet4d &x) {
 #if EIGEN_FAST_MATH
 template <>
 EIGEN_DEFINE_FUNCTION_ALLOWING_MULTIPLE_DEFINITIONS EIGEN_UNUSED Packet8f
-psqrt<Packet8f>(const Packet8f &_x) {
+psqrt<Packet8f>(const Packet8f& _x) {
   Packet8f half = pmul(_x, pset1<Packet8f>(.5f));
   Packet8f denormal_mask = _mm256_and_ps(
       _mm256_cmp_ps(_x, pset1<Packet8f>((std::numeric_limits<float>::min)()),
@@ -79,27 +79,24 @@ psqrt<Packet8f>(const Packet8f &_x) {
   // Compute approximate reciprocal sqrt.
   Packet8f x = _mm256_rsqrt_ps(_x);
   // Do a single step of Newton's iteration.
-  x = pmul(x, psub(pset1<Packet8f>(1.5f), pmul(half, pmul(x, x))));
+  x = pmul(x, psub(pset1<Packet8f>(1.5f), pmul(half, pmul(x,x))));
   // Flush results for denormals to zero.
-  return _mm256_andnot_ps(denormal_mask, pmul(_x, x));
+  return _mm256_andnot_ps(denormal_mask, pmul(_x,x));
 }
 #else
-template <>
-EIGEN_DEFINE_FUNCTION_ALLOWING_MULTIPLE_DEFINITIONS EIGEN_UNUSED Packet8f
-psqrt<Packet8f>(const Packet8f &x) {
+template <> EIGEN_DEFINE_FUNCTION_ALLOWING_MULTIPLE_DEFINITIONS EIGEN_UNUSED
+Packet8f psqrt<Packet8f>(const Packet8f& x) {
   return _mm256_sqrt_ps(x);
 }
 #endif
-template <>
-EIGEN_DEFINE_FUNCTION_ALLOWING_MULTIPLE_DEFINITIONS EIGEN_UNUSED Packet4d
-psqrt<Packet4d>(const Packet4d &x) {
+template <> EIGEN_DEFINE_FUNCTION_ALLOWING_MULTIPLE_DEFINITIONS EIGEN_UNUSED
+Packet4d psqrt<Packet4d>(const Packet4d& x) {
   return _mm256_sqrt_pd(x);
 }
 #if EIGEN_FAST_MATH
 
-template <>
-EIGEN_DEFINE_FUNCTION_ALLOWING_MULTIPLE_DEFINITIONS EIGEN_UNUSED Packet8f
-prsqrt<Packet8f>(const Packet8f &_x) {
+template<> EIGEN_DEFINE_FUNCTION_ALLOWING_MULTIPLE_DEFINITIONS EIGEN_UNUSED
+Packet8f prsqrt<Packet8f>(const Packet8f& _x) {
   _EIGEN_DECLARE_CONST_Packet8f_FROM_INT(inf, 0x7f800000);
   _EIGEN_DECLARE_CONST_Packet8f_FROM_INT(nan, 0x7fc00000);
   _EIGEN_DECLARE_CONST_Packet8f(one_point_five, 1.5f);
@@ -127,23 +124,22 @@ prsqrt<Packet8f>(const Packet8f &_x) {
 }
 
 #else
-template <>
-EIGEN_DEFINE_FUNCTION_ALLOWING_MULTIPLE_DEFINITIONS EIGEN_UNUSED Packet8f
-prsqrt<Packet8f>(const Packet8f &x) {
+template <> EIGEN_DEFINE_FUNCTION_ALLOWING_MULTIPLE_DEFINITIONS EIGEN_UNUSED
+Packet8f prsqrt<Packet8f>(const Packet8f& x) {
   _EIGEN_DECLARE_CONST_Packet8f(one, 1.0f);
   return _mm256_div_ps(p8f_one, _mm256_sqrt_ps(x));
 }
 #endif
 
-template <>
-EIGEN_DEFINE_FUNCTION_ALLOWING_MULTIPLE_DEFINITIONS EIGEN_UNUSED Packet4d
-prsqrt<Packet4d>(const Packet4d &x) {
+template <> EIGEN_DEFINE_FUNCTION_ALLOWING_MULTIPLE_DEFINITIONS EIGEN_UNUSED
+Packet4d prsqrt<Packet4d>(const Packet4d& x) {
   _EIGEN_DECLARE_CONST_Packet4d(one, 1.0);
   return _mm256_div_pd(p4d_one, _mm256_sqrt_pd(x));
 }
 
-} // end namespace internal
 
-} // end namespace Eigen
+}  // end namespace internal
 
-#endif // EIGEN_MATH_FUNCTIONS_AVX_H
+}  // end namespace Eigen
+
+#endif  // EIGEN_MATH_FUNCTIONS_AVX_H

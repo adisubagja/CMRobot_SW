@@ -9,20 +9,22 @@
 
 #define EIGEN_USE_THREADS
 
+#include <stdlib.h>
 #include "main.h"
 #include <Eigen/CXX11/Tensor>
-#include <stdlib.h>
+
 
 namespace {
 
-void WaitAndAdd(Eigen::Notification *n, int *counter) {
+void WaitAndAdd(Eigen::Notification* n, int* counter) {
   n->Wait();
   *counter = *counter + 1;
 }
 
-} // namespace
+}  // namespace
 
-static void test_notification_single() {
+static void test_notification_single()
+{
   ThreadPool thread_pool(1);
 
   int counter = 0;
@@ -45,7 +47,8 @@ static void test_notification_single() {
 
 // Like test_notification_single() but enqueues multiple threads to
 // validate that all threads get notified by Notify().
-static void test_notification_multiple() {
+static void test_notification_multiple()
+{
   ThreadPool thread_pool(1);
 
   int counter = 0;
@@ -62,7 +65,8 @@ static void test_notification_multiple() {
   VERIFY_IS_EQUAL(counter, 4);
 }
 
-EIGEN_DECLARE_TEST(cxx11_tensor_notification) {
+EIGEN_DECLARE_TEST(cxx11_tensor_notification)
+{
   CALL_SUBTEST(test_notification_single());
   CALL_SUBTEST(test_notification_multiple());
 }
