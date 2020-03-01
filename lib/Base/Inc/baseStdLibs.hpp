@@ -12,6 +12,7 @@
 #define BASESTDLIBS_HPP
 
 #include <condition_variable>
+#include <iomanip>
 #include <iostream>
 #include <limits>
 #include <mutex>
@@ -19,6 +20,5 @@
 #include <string>
 #include <thread>
 #include <vector>
-#include <iomanip>
 
 #endif

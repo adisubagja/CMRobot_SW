@@ -1,28 +1,27 @@
 
 #include "baseStdLibs.hpp"
 #include "cmrDynamics.hpp"
+#include "cmrException.hpp"
 #include "cmrMath.hpp"
 #include "cmrURDFParser.hpp"
 #include "multiThreadTest.hpp"
 #include "myHello.h"
 #include "tinyxml2/tinyxml2.h"
-#include <math.h>
-#include "cmrException.hpp"
 #include <fstream>
+#include <math.h>
 
 int a =0;
 using namespace cmr;
 int main()
 {
   // std::string urdffile="../../../config/robotCfg/flexivRobot.urdf";
-  std::string urdffile="../config/robotCfg/flexivRobot.urdf";
+  std::string urdffile = "../config/robotCfg/flexivRobot.urdf";
   cmrURDFParser urdfParser = cmrURDFParser();
-  try{
-    cmrRobotData* robotData=urdfParser.parseURDF(urdffile);
+  try {
+    cmrRobotData *robotData = urdfParser.parseURDF(urdffile);
     robotData->printInfo();
-  }
-  catch(cmrException cmrError){
-    std::cout<< cmrError.what();
+  } catch (cmrException cmrError) {
+    std::cout << cmrError.what();
   }
 
   // tinyxml2::XMLDocument doc;

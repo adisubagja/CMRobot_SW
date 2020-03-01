@@ -1,14 +1,13 @@
-/* 
+/*
  * cmrURDFParser.hpp
- * 
+ *
  * Description: This file provide parser for robot URDF file,
- * 
+ *
  * WARNING: Now Only Seriel Robots Are Supported
- * 
+ *
  * Author: Feijian.Ni
  * Date: 2020.2.20
-*/
-
+ */
 
 #ifndef CMRURDFPARSER_HPP_
 #define CMRURDFPARSER_HPP_
@@ -19,32 +18,29 @@
 
 using namespace tinyxml2;
 
+namespace cmr {
 
-namespace cmr{
-
-class cmrURDFParser
-{
+class cmrURDFParser {
 public:
-    cmrURDFParser();
-    ~cmrURDFParser();
+  cmrURDFParser();
+  ~cmrURDFParser();
 
-    //! parse URDF file
-    //! Inpute: string of URDF file name
-    //! Output: cmrRobotData Struct
-    cmrRobotData* parseURDF(const std::string& URDFFileName);
-    
+  //! parse URDF file
+  //! Inpute: string of URDF file name
+  //! Output: cmrRobotData Struct
+  cmrRobotData *parseURDF(const std::string &URDFFileName);
+
 protected:
-    //! parse link Data
-    void parseLinkData(const XMLElement* curLinkElement, cmrLinkData& linkData);
+  //! parse link Data
+  void parseLinkData(const XMLElement *curLinkElement, cmrLinkData &linkData);
 
-    //! parse joint Data
-    void parseJointData(const XMLElement* curJointElement, cmrJointData& jointData);
+  //! parse joint Data
+  void parseJointData(const XMLElement *curJointElement,
+                      cmrJointData &jointData);
 
-    //! converte rpy string to rot matrix
-    void rpyStrToRotMat(const std::string rpyStr, cmrMatrix3d& rotMat); 
+  //! converte rpy string to rot matrix
+  void rpyStrToRotMat(const std::string rpyStr, cmrMatrix3d &rotMat);
 };
-}
-
+} // namespace cmr
 
 #endif
-
