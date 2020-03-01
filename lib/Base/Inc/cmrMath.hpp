@@ -1,9 +1,16 @@
 /*
- * This file provide variable math function,
+ * cmrMath.hpp
+ *
+ * Description: This file provide variable math function,
  * mainly about matrix and vector computation
+ *
+ * Author: Feijian.Ni
+ * Data: 2020.2.13
  */
 
-// #include <eigen3/Eigen/Dense>
+#ifndef CMRMATH_HPP_
+#define CMRMATH_HPP_
+
 #include "Eigen/Dense"
 
 namespace cmr {
@@ -81,3 +88,5 @@ typedef Eigen::Quaterniond cmrQuat;
 typedef Eigen::AngleAxisd cmrAngleAxis;
 
 } // namespace cmr
+
+#endif

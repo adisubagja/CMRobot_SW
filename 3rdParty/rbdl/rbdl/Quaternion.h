@@ -50,141 +50,143 @@ public:
         (*this)[3] * q[3] - (*this)[0] * q[0] - (*this)[1] * q[1] -
             (*this)[2] * q[2]);
     return *this;
-  }
-
-  static Quaternion fromGLRotate(double angle, double x, double y, double z) {
-    double st = std::sin(angle * M_PI / 360.);
-    return Quaternion(st * x, st * y, st * z, std::cos(angle * M_PI / 360.));
-  }
-
-  Quaternion slerp(double alpha, const Quaternion &quat) const {
-    // check whether one of the two has 0 length
-    double s = std::sqrt(squaredNorm() * quat.squaredNorm());
-
-    // division by 0.f is unhealthy!
-    assert(s != 0.);
-
-    double angle = acos(dot(quat) / s);
-    if (angle == 0. || std::isnan(angle)) {
-      return *this;
     }
-    assert(!std::isnan(angle));
 
-    double d = 1. / std::sin(angle);
-    double p0 = std::sin((1. - alpha) * angle);
-    double p1 = std::sin(alpha * angle);
-
-    if (dot(quat) < 0.) {
-      return Quaternion(((*this) * p0 - quat * p1) * d);
+    static Quaternion fromGLRotate(double angle, double x, double y, double z) {
+      double st = std::sin(angle * M_PI / 360.);
+      return Quaternion(st * x, st * y, st * z, std::cos(angle * M_PI / 360.));
     }
-    return Quaternion(((*this) * p0 + quat * p1) * d);
-  }
 
-  static Quaternion fromAxisAngle(const Vector3d &axis, double angle_rad) {
-    double d = axis.norm();
-    double s2 = std::sin(angle_rad * 0.5) / d;
-    return Quaternion(axis[0] * s2, axis[1] * s2, axis[2] * s2,
-                      std::cos(angle_rad * 0.5));
-  }
+    Quaternion slerp(double alpha, const Quaternion &quat) const {
+      // check whether one of the two has 0 length
+      double s = std::sqrt(squaredNorm() * quat.squaredNorm());
 
-  static Quaternion fromMatrix(const Matrix3d &mat) {
-    double w = std::sqrt(1. + mat(0, 0) + mat(1, 1) + mat(2, 2)) * 0.5;
-    return Quaternion((mat(1, 2) - mat(2, 1)) / (w * 4.),
-                      (mat(2, 0) - mat(0, 2)) / (w * 4.),
-                      (mat(0, 1) - mat(1, 0)) / (w * 4.), w);
-  }
+      // division by 0.f is unhealthy!
+      assert(s != 0.);
 
-  static Quaternion fromZYXAngles(const Vector3d &zyx_angles) {
-    return Quaternion::fromAxisAngle(Vector3d(0., 0., 1.), zyx_angles[0]) *
-           Quaternion::fromAxisAngle(Vector3d(0., 1., 0.), zyx_angles[1]) *
-           Quaternion::fromAxisAngle(Vector3d(1., 0., 0.), zyx_angles[2]);
-  }
+      double angle = acos(dot(quat) / s);
+      if (angle == 0. || std::isnan(angle)) {
+        return *this;
+      }
+      assert(!std::isnan(angle));
 
-  static Quaternion fromYXZAngles(const Vector3d &yxz_angles) {
-    return Quaternion::fromAxisAngle(Vector3d(0., 1., 0.), yxz_angles[0]) *
-           Quaternion::fromAxisAngle(Vector3d(1., 0., 0.), yxz_angles[1]) *
-           Quaternion::fromAxisAngle(Vector3d(0., 0., 1.), yxz_angles[2]);
-  }
+      double d = 1. / std::sin(angle);
+      double p0 = std::sin((1. - alpha) * angle);
+      double p1 = std::sin(alpha * angle);
 
-  static Quaternion fromXYZAngles(const Vector3d &xyz_angles) {
-    return Quaternion::fromAxisAngle(Vector3d(0., 0., 01.), xyz_angles[2]) *
-           Quaternion::fromAxisAngle(Vector3d(0., 1., 0.), xyz_angles[1]) *
-           Quaternion::fromAxisAngle(Vector3d(1., 0., 0.), xyz_angles[0]);
-  }
+      if (dot(quat) < 0.) {
+        return Quaternion(((*this) * p0 - quat * p1) * d);
+      }
+      return Quaternion(((*this) * p0 + quat * p1) * d);
+    }
 
-  Matrix3d toMatrix() const {
-    double x = (*this)[0];
-    double y = (*this)[1];
-    double z = (*this)[2];
-    double w = (*this)[3];
-    return Matrix3d(
-        1 - 2 * y * y - 2 * z * z, 2 * x * y + 2 * w * z, 2 * x * z - 2 * w * y,
+    static Quaternion fromAxisAngle(const Vector3d &axis, double angle_rad) {
+      double d = axis.norm();
+      double s2 = std::sin(angle_rad * 0.5) / d;
+      return Quaternion(axis[0] * s2, axis[1] * s2, axis[2] * s2,
+                        std::cos(angle_rad * 0.5));
+    }
 
-        2 * x * y - 2 * w * z, 1 - 2 * x * x - 2 * z * z, 2 * y * z + 2 * w * x,
+    static Quaternion fromMatrix(const Matrix3d &mat) {
+      double w = std::sqrt(1. + mat(0, 0) + mat(1, 1) + mat(2, 2)) * 0.5;
+      return Quaternion((mat(1, 2) - mat(2, 1)) / (w * 4.),
+                        (mat(2, 0) - mat(0, 2)) / (w * 4.),
+                        (mat(0, 1) - mat(1, 0)) / (w * 4.), w);
+    }
 
-        2 * x * z + 2 * w * y, 2 * y * z - 2 * w * x, 1 - 2 * x * x - 2 * y * y
+    static Quaternion fromZYXAngles(const Vector3d &zyx_angles) {
+      return Quaternion::fromAxisAngle(Vector3d(0., 0., 1.), zyx_angles[0]) *
+             Quaternion::fromAxisAngle(Vector3d(0., 1., 0.), zyx_angles[1]) *
+             Quaternion::fromAxisAngle(Vector3d(1., 0., 0.), zyx_angles[2]);
+    }
 
-        /*
-           1 - 2*y*y - 2*z*z,
-           2*x*y - 2*w*z,
-           2*x*z + 2*w*y,
+    static Quaternion fromYXZAngles(const Vector3d &yxz_angles) {
+      return Quaternion::fromAxisAngle(Vector3d(0., 1., 0.), yxz_angles[0]) *
+             Quaternion::fromAxisAngle(Vector3d(1., 0., 0.), yxz_angles[1]) *
+             Quaternion::fromAxisAngle(Vector3d(0., 0., 1.), yxz_angles[2]);
+    }
 
-           2*x*y + 2*w*z,
-           1 - 2*x*x - 2*z*z,
-           2*y*z - 2*w*x,
+    static Quaternion fromXYZAngles(const Vector3d &xyz_angles) {
+      return Quaternion::fromAxisAngle(Vector3d(0., 0., 01.), xyz_angles[2]) *
+             Quaternion::fromAxisAngle(Vector3d(0., 1., 0.), xyz_angles[1]) *
+             Quaternion::fromAxisAngle(Vector3d(1., 0., 0.), xyz_angles[0]);
+    }
 
-           2*x*z - 2*w*y,
-           2*y*z + 2*w*x,
-           1 - 2*x*x - 2*y*y
-           */
-    );
-  }
+    Matrix3d toMatrix() const {
+      double x = (*this)[0];
+      double y = (*this)[1];
+      double z = (*this)[2];
+      double w = (*this)[3];
+      return Matrix3d(1 - 2 * y * y - 2 * z * z, 2 * x * y + 2 * w * z,
+                      2 * x * z - 2 * w * y,
 
-  Quaternion conjugate() const {
-    return Quaternion(-(*this)[0], -(*this)[1], -(*this)[2], (*this)[3]);
-  }
+                      2 * x * y - 2 * w * z, 1 - 2 * x * x - 2 * z * z,
+                      2 * y * z + 2 * w * x,
 
-  Quaternion timeStep(const Vector3d &omega, double dt) {
-    double omega_norm = omega.norm();
-    return Quaternion::fromAxisAngle(omega / omega_norm, dt * omega_norm) *
-           (*this);
-  }
+                      2 * x * z + 2 * w * y, 2 * y * z - 2 * w * x,
+                      1 - 2 * x * x - 2 * y * y
 
-  Vector3d rotate(const Vector3d &vec) const {
-    Vector3d vn(vec);
-    Quaternion vec_quat(vn[0], vn[1], vn[2], 0.f), res_quat;
+                      /*
+                         1 - 2*y*y - 2*z*z,
+                         2*x*y - 2*w*z,
+                         2*x*z + 2*w*y,
 
-    res_quat = vec_quat * (*this);
-    res_quat = conjugate() * res_quat;
+                         2*x*y + 2*w*z,
+                         1 - 2*x*x - 2*z*z,
+                         2*y*z - 2*w*x,
 
-    return Vector3d(res_quat[0], res_quat[1], res_quat[2]);
-  }
+                         2*x*z - 2*w*y,
+                         2*y*z + 2*w*x,
+                         1 - 2*x*x - 2*y*y
+                         */
+      );
+    }
 
-  /** \brief Converts a 3d angular velocity vector into a 4d derivative of the
-   * components of the quaternion.
-   *
-   * \param omega the angular velocity.
-   *
-   * \return a 4d vector containing the derivatives of the 4 components of the
-   * quaternion corresponding to omega.
-   *
-   */
-  Vector4d omegaToQDot(const Vector3d &omega) const {
-    Math::Matrix43 m;
-    m(0, 0) = (*this)[3];
-    m(0, 1) = -(*this)[2];
-    m(0, 2) = (*this)[1];
-    m(1, 0) = (*this)[2];
-    m(1, 1) = (*this)[3];
-    m(1, 2) = -(*this)[0];
-    m(2, 0) = -(*this)[1];
-    m(2, 1) = (*this)[0];
-    m(2, 2) = (*this)[3];
-    m(3, 0) = -(*this)[0];
-    m(3, 1) = -(*this)[1];
-    m(3, 2) = -(*this)[2];
-    return Quaternion(0.5 * m * omega);
-  }
+    Quaternion conjugate() const {
+      return Quaternion(-(*this)[0], -(*this)[1], -(*this)[2], (*this)[3]);
+    }
+
+    Quaternion timeStep(const Vector3d &omega, double dt) {
+      double omega_norm = omega.norm();
+      return Quaternion::fromAxisAngle(omega / omega_norm, dt * omega_norm) *
+             (*this);
+    }
+
+    Vector3d rotate(const Vector3d &vec) const {
+      Vector3d vn(vec);
+      Quaternion vec_quat(vn[0], vn[1], vn[2], 0.f), res_quat;
+
+      res_quat = vec_quat * (*this);
+      res_quat = conjugate() * res_quat;
+
+      return Vector3d(res_quat[0], res_quat[1], res_quat[2]);
+    }
+
+    /** \brief Converts a 3d angular velocity vector into a 4d derivative of the
+     * components of the quaternion.
+     *
+     * \param omega the angular velocity.
+     *
+     * \return a 4d vector containing the derivatives of the 4 components of the
+     * quaternion corresponding to omega.
+     *
+     */
+    Vector4d omegaToQDot(const Vector3d &omega) const {
+      Math::Matrix43 m;
+      m(0, 0) = (*this)[3];
+      m(0, 1) = -(*this)[2];
+      m(0, 2) = (*this)[1];
+      m(1, 0) = (*this)[2];
+      m(1, 1) = (*this)[3];
+      m(1, 2) = -(*this)[0];
+      m(2, 0) = -(*this)[1];
+      m(2, 1) = (*this)[0];
+      m(2, 2) = (*this)[3];
+      m(3, 0) = -(*this)[0];
+      m(3, 1) = -(*this)[1];
+      m(3, 2) = -(*this)[2];
+      return Quaternion(0.5 * m * omega);
+    }
 };
 
 } // namespace Math

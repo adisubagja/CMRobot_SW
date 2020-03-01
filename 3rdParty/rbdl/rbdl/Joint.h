@@ -304,49 +304,49 @@ struct RBDL_DLLAPI Joint {
       assert(0);
       abort();
     }
-  }
-  Joint(JointType type, int degreesOfFreedom)
-      : mJointAxes(NULL), mJointType(type), mDoFCount(0), q_index(0),
-        custom_joint_index(-1) {
-    if (type == JointTypeCustom) {
-      mDoFCount = degreesOfFreedom;
-      mJointAxes = new Math::SpatialVector[mDoFCount];
-      for (unsigned int i = 0; i < mDoFCount; ++i) {
-        mJointAxes[i] = Math::SpatialVector(0., 0., 0., 0., 0., 0.);
-      }
-    } else {
-      std::cerr << "Error: Invalid use of Joint constructor Joint(JointType"
-                << " type, int degreesOfFreedom). Only allowed when "
-                << "type  == JointTypeCustom." << std::endl;
-      assert(0);
-      abort();
     }
-  }
-  Joint(const Joint &joint)
-      : mJointType(joint.mJointType), mDoFCount(joint.mDoFCount),
-        q_index(joint.q_index), custom_joint_index(joint.custom_joint_index) {
-    mJointAxes = new Math::SpatialVector[mDoFCount];
-
-    for (unsigned int i = 0; i < mDoFCount; i++)
-      mJointAxes[i] = joint.mJointAxes[i];
-  };
-  Joint &operator=(const Joint &joint) {
-    if (this != &joint) {
-      if (mDoFCount > 0) {
-        assert(mJointAxes);
-        delete[] mJointAxes;
+    Joint(JointType type, int degreesOfFreedom)
+        : mJointAxes(NULL), mJointType(type), mDoFCount(0), q_index(0),
+          custom_joint_index(-1) {
+      if (type == JointTypeCustom) {
+        mDoFCount = degreesOfFreedom;
+        mJointAxes = new Math::SpatialVector[mDoFCount];
+        for (unsigned int i = 0; i < mDoFCount; ++i) {
+          mJointAxes[i] = Math::SpatialVector(0., 0., 0., 0., 0., 0.);
+        }
+      } else {
+        std::cerr << "Error: Invalid use of Joint constructor Joint(JointType"
+                  << " type, int degreesOfFreedom). Only allowed when "
+                  << "type  == JointTypeCustom." << std::endl;
+        assert(0);
+        abort();
       }
-      mJointType = joint.mJointType;
-      mDoFCount = joint.mDoFCount;
-      custom_joint_index = joint.custom_joint_index;
+    }
+    Joint(const Joint &joint)
+        : mJointType(joint.mJointType), mDoFCount(joint.mDoFCount),
+          q_index(joint.q_index), custom_joint_index(joint.custom_joint_index) {
       mJointAxes = new Math::SpatialVector[mDoFCount];
 
       for (unsigned int i = 0; i < mDoFCount; i++)
         mJointAxes[i] = joint.mJointAxes[i];
+    };
+    Joint &operator=(const Joint &joint) {
+      if (this != &joint) {
+        if (mDoFCount > 0) {
+          assert(mJointAxes);
+          delete[] mJointAxes;
+        }
+        mJointType = joint.mJointType;
+        mDoFCount = joint.mDoFCount;
+        custom_joint_index = joint.custom_joint_index;
+        mJointAxes = new Math::SpatialVector[mDoFCount];
 
-      q_index = joint.q_index;
-    }
-    return *this;
+        for (unsigned int i = 0; i < mDoFCount; i++)
+          mJointAxes[i] = joint.mJointAxes[i];
+
+        q_index = joint.q_index;
+      }
+      return *this;
   }
   ~Joint() {
     if (mJointAxes) {

@@ -11,10 +11,13 @@ project(CMRobt)
 # set third party library head file path
 set(thirdPartyDir CACHE PATH "directory for third party libs")
 include_directories(${thirdPartyDir}/Eigen)
-#include_directories(${thirdPartyDir}/rbdl)
+include_directories(${thirdPartyDir}/rbdl)
+include_directories(${thirdPartyDir}/tinyxml2)
+
 
 # set third party library path
-#link_directoried(${thirdPartyDir}/rbdl/lib)
+link_directories(${thirdPartyDir}/rbdl/lib)
+link_directories(${thirdPartyDir}/tinyxml2/lib)
 
 # add all the directories here to be compelled
 add_subdirectory(lib)
