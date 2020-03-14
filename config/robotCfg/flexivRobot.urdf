@@ -1,8 +1,9 @@
 <?xml version="1.0"?>
-<!-- ALL THE LINK SHOULD BE NAME AS LinkX,X start form 0 -->
+<!--A "Base" link must be defined-->>
+<!-- All the link should be name as "LinkX",X start form 1 -->
 <!-- FVR ROBOT DATA -->
 <robot name="fvrRobot">
-  <link name="Link0">
+  <link name="Base">
     <visual>
         <geometry>
           <mesh filename=".\graphics\Link\link0.STL"/>
@@ -31,7 +32,7 @@
   </link>
   <joint name="joint1" type="revolute">
     <axis xyz="0 0 1"/>
-    <parent link="Link0"/>
+    <parent link="Base"/>
     <child link="Link1"/>
     <origin rpy="0 0 3.14" xyz="0.0 0.0 0.113700"/>
     <limit effort="90" velocity="130" lower="-2.85" upper="2.85"/>

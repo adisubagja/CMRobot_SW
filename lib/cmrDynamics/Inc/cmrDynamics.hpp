@@ -11,6 +11,8 @@
 #ifndef CMRDYNAMICS_HPP
 #define CMRDYNAMICS_HPP
 
+#include "cmrException.hpp"
+#include "cmrRobotData.hpp"
 #include "rbdl/rbdl.h"
 
 namespace cmr{
@@ -22,8 +24,8 @@ public:
   ~cmrDynamics();
 
   //! creat robot model with urdf file
-  bool createRobotModel(const char *urdfFilename,
-                        RigidBodyDynamics::Model *model);
+  cmrErrorType createRobotModel(const cmrRobotData &robotData,
+                                RigidBodyDynamics::Model *model);
 };
 
 } // namespace cmr

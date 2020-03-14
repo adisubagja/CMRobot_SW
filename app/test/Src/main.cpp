@@ -16,9 +16,10 @@ int main()
 {
   // std::string urdffile="../../../config/robotCfg/flexivRobot.urdf";
   std::string urdffile = "../config/robotCfg/flexivRobot.urdf";
-  cmrURDFParser urdfParser = cmrURDFParser();
+  cmrURDFParser urdfParser;
+  cmrRobotData *robotData = new cmrRobotData();
   try {
-    cmrRobotData *robotData = urdfParser.parseURDF(urdffile);
+    urdfParser.parseURDF(urdffile, robotData);
     robotData->printInfo();
   } catch (cmrException cmrError) {
     std::cout << cmrError.what();

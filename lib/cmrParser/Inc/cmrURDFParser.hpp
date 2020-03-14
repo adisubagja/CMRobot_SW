@@ -13,6 +13,7 @@
 #define CMRURDFPARSER_HPP_
 
 #include "baseStdLibs.hpp"
+#include "cmrException.hpp"
 #include "cmrRobotData.hpp"
 #include "tinyxml2/tinyxml2.h"
 
@@ -28,15 +29,17 @@ public:
   //! parse URDF file
   //! Inpute: string of URDF file name
   //! Output: cmrRobotData Struct
-  cmrRobotData *parseURDF(const std::string &URDFFileName);
+  cmrErrorType parseURDF(const std::string &URDFFileName,
+                         cmrRobotData *robotDataPtr);
 
 protected:
   //! parse link Data
-  void parseLinkData(const XMLElement *curLinkElement, cmrLinkData &linkData);
+  cmrErrorType parseLinkData(const XMLElement *curLinkElement,
+                             cmrLinkData &linkData);
 
   //! parse joint Data
-  void parseJointData(const XMLElement *curJointElement,
-                      cmrJointData &jointData);
+  cmrErrorType parseJointData(const XMLElement *curJointElement,
+                              cmrJointData &jointData);
 
   //! converte rpy string to rot matrix
   void rpyStrToRotMat(const std::string rpyStr, cmrMatrix3d &rotMat);

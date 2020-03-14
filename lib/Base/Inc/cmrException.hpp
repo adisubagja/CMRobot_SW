@@ -15,6 +15,8 @@
 
 namespace cmr {
 
+enum cmrErrorType { CMR_SUCCESS = 0, CMR_FILE_NOT_FOULD, CMR_ERROR };
+
 struct cmrException : public std::exception {
   //! constructor
   cmrException(std::string msg) { message = msg; }

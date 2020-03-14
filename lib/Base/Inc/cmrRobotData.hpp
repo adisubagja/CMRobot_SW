@@ -16,6 +16,9 @@
 
 namespace cmr {
 
+//! robot base link name
+const std::string g_baseLinkName = "Base";
+
 //! link defined data
 struct cmrLinkData {
   cmrLinkData() : m_linkMass(0) { m_inertia = cmrMatrix3d::Constant(1e-6); }
@@ -128,6 +131,7 @@ struct cmrRobotData {
     m_linksData.clear();
     m_jointsData.clear();
     m_robotDoFs = 0;
+    m_gravity << 0, 0, -9.8;
   }
 
   //! robot name
@@ -135,6 +139,9 @@ struct cmrRobotData {
 
   //! robot dofs
   unsigned int m_robotDoFs;
+
+  //! gravity
+  cmrVector3d m_gravity;
 
   //! link data
   std::vector<cmrLinkData> m_linksData;

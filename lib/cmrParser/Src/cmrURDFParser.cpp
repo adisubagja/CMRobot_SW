@@ -7,7 +7,6 @@
  */
 
 #include "cmrURDFParser.hpp"
-#include "cmrException.hpp"
 #include <fstream>
 #include <sstream>
 using namespace tinyxml2;
@@ -41,9 +40,9 @@ cmrURDFParser::~cmrURDFParser() {}
 //! parse URDF file
 //! Inpute: string of URDF file name
 //! Output: cmrRobotData Struct
-cmrRobotData *cmrURDFParser::parseURDF(const string &URDFFileName) {
+cmrErrorType cmrURDFParser::parseURDF(const string &URDFFileName,
+                                      cmrRobotData *robotData) {
   //! init robot data struct
-  cmrRobotData *robotData = new cmrRobotData();
   robotData->init();
 
   //! load URDF file
@@ -60,10 +59,18 @@ cmrRobotData *cmrURDFParser::parseURDF(const string &URDFFileName) {
   //! get all the links data iteratively
   cmrLinkData linkData;
   XMLElement *curLinkElement;
+  bool baseLinkDefined = false;
   while (curLinkElement = robotRootElement->FirstChildElement("link")) {
     parseLinkData(curLinkElement, linkData);
     robotData->m_linksData.push_back(linkData);
     robotRootElement->DeleteChild(curLinkElement);
+    if (g_baseLinkName == linkData.m_linkName) {
+      baseLinkDefined = true;
+    }
+  }
+  if (!baseLinkDefined) {
+    string msg = "No Base link is defined";
+    throw cmrException(msg);
   }
 
   // ! get all the joints data iteratively
@@ -76,12 +83,12 @@ cmrRobotData *cmrURDFParser::parseURDF(const string &URDFFileName) {
     robotRootElement->DeleteChild(curJointElement);
   }
 
-  return robotData;
+  return CMR_SUCCESS;
 }
 
 //! parse link Data
-void cmrURDFParser::parseLinkData(const XMLElement *curLinkElement,
-                                  cmrLinkData &linkData) {
+cmrErrorType cmrURDFParser::parseLinkData(const XMLElement *curLinkElement,
+                                          cmrLinkData &linkData) {
   //! get attribute of link name
   string name = curLinkElement->FirstAttribute()->Value();
   if (name.empty()) {
@@ -147,10 +154,12 @@ void cmrURDFParser::parseLinkData(const XMLElement *curLinkElement,
     string msg = "No inertial element in URDF file";
     throw cmrException(msg);
   }
+
+  return CMR_SUCCESS;
 }
 //! parse joint Data
-void cmrURDFParser::parseJointData(const XMLElement *curJointElement,
-                                   cmrJointData &jointData) {
+cmrErrorType cmrURDFParser::parseJointData(const XMLElement *curJointElement,
+                                           cmrJointData &jointData) {
   //! get attribute of joint name
   string name = curJointElement->FindAttribute("name")->Value();
   if (name.empty()) {
@@ -257,6 +266,8 @@ void cmrURDFParser::parseJointData(const XMLElement *curJointElement,
     jointData.m_friction =
         std::stod(dynamicsElement->FindAttribute("friction")->Value());
   }
+
+  return CMR_SUCCESS;
 }
 
 //! converte rpy string to rot matrix
