@@ -10,7 +10,6 @@
 #include <fstream>
 #include <math.h>
 
-int a =0;
 using namespace cmr;
 int main()
 {

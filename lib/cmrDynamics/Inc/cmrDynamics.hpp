@@ -26,6 +26,9 @@ public:
   //! creat robot model with urdf file
   cmrErrorType createRobotModel(const cmrRobotData &robotData,
                                 RigidBodyDynamics::Model *model);
+
+  //! get rbdl joint type
+  RigidBodyDynamics::JointType getChildJointType(cmrJointType jointType);
 };
 
 } // namespace cmr

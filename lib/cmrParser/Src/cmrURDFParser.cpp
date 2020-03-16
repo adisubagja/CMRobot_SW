@@ -13,24 +13,6 @@ using namespace tinyxml2;
 using std::string;
 namespace cmr {
 
-//---------------------------Definition-----------------------------
-
-//! robot joint type define
-enum cmrJointType {
-  CMR_JOINT_FIXED = 0,
-  CMR_JOINT_CONTINUOUS,
-  CMR_JOINT_REVOLUTE,
-  CMR_JOINT_PRISMATIC,
-  CMR_JOINT_FLOATING,
-  CMR_JOINT_PLANAR,
-
-  CMR_JOINTTYPE_NUM = CMR_JOINT_PLANAR - CMR_JOINT_FIXED + 1
-};
-
-//! robot joint type name define
-const std::string g_cmrJointTypeName[6] = {
-    "fixed", "continuous", "revolute", "prismatic", "floating", "planar"};
-
 //---------------------------Class Definition------------------------:w
 
 cmrURDFParser::cmrURDFParser() {}
@@ -173,7 +155,7 @@ cmrErrorType cmrURDFParser::parseJointData(const XMLElement *curJointElement,
   bool findJointType = false;
   for (int jointType = 0; jointType < CMR_JOINTTYPE_NUM; jointType++) {
     if (g_cmrJointTypeName[jointType] == type) {
-      switch ((cmrJointType)jointType) {
+      switch (static_cast<cmrJointType>(jointType)) {
       case CMR_JOINT_FIXED:
         jointData.m_jointDoFs = 0;
         break;
@@ -193,6 +175,7 @@ cmrErrorType cmrURDFParser::parseJointData(const XMLElement *curJointElement,
       }
 
       findJointType = true;
+      jointData.m_jointType = static_cast<cmrJointType>(jointType);
       break;
     }
   }
@@ -200,7 +183,6 @@ cmrErrorType cmrURDFParser::parseJointData(const XMLElement *curJointElement,
     string msg = "Joint type of " + type + " is not supported now";
     throw cmrException(msg);
   }
-  jointData.m_jointType = type;
 
   //! joint axis
   const XMLElement *axisElement = curJointElement->FirstChildElement("axis");

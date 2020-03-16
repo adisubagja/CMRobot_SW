@@ -12,11 +12,11 @@
 #define BASESTDLIBS_HPP
 
 #include <condition_variable>
+#include <cstdio>
 #include <iomanip>
 #include <iostream>
 #include <limits>
 #include <mutex>
-#include <stdio.h>
 #include <string>
 #include <thread>
 #include <vector>
