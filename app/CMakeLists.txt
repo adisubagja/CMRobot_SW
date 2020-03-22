@@ -5,4 +5,4 @@
 
 
 # add all the app directories here to be compelled
-add_subdirectory(test)
+add_subdirectory(CMRobotApp)

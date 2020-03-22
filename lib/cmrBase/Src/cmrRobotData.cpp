@@ -14,12 +14,13 @@ namespace cmr {
 void cmrLinkData::printInfo() {
   std::cout << "linkName:" << m_linkName << std::endl;
   std::cout << "linkMass:" << m_linkMass << std::endl;
-  std::cout << "COM_xyz:" << m_massCenterOrigin.pos.transpose() << std::endl;
-  std::cout << "COM_rot:" << std::endl << m_massCenterOrigin.rot << std::endl;
+  std::cout << "COM_xyz:" << m_massCenterOrigin.m_pos.transpose() << std::endl;
+  std::cout << "COM_rot:" << std::endl << m_massCenterOrigin.m_rot << std::endl;
   std::cout << "inertia:" << std::endl << m_inertia << std::endl;
-  std::cout << "geometry_xyz:" << m_geometryOrigin.pos.transpose() << std::endl;
+  std::cout << "geometry_xyz:" << m_geometryOrigin.m_pos.transpose()
+            << std::endl;
   std::cout << "geometry_rot:" << std::endl
-            << m_geometryOrigin.rot << std::endl;
+            << m_geometryOrigin.m_rot << std::endl;
 }
 
 //! pirnt joint info
@@ -29,9 +30,10 @@ void cmrJointData::printInfo() {
   std::cout << "JointAxis:" << m_jointAxis.transpose() << std::endl;
   std::cout << "parentLink" << m_parentLink << std::endl;
   std::cout << "childLink:" << m_childLink << std::endl;
-  std::cout << "jointOrigin_xyz:" << m_jointOrigin.pos.transpose() << std::endl;
+  std::cout << "jointOrigin_xyz:" << m_jointOrigin.m_pos.transpose()
+            << std::endl;
   std::cout << "jointOrigin_rot:" << std::endl
-            << m_jointOrigin.rot << std::endl;
+            << m_jointOrigin.m_rot << std::endl;
   std::cout << "maxEffort:" << m_maxEffort << std::endl;
   std::cout << "maxVelocity:" << m_maxEffort << std::endl;
   std::cout << "maxPos:" << m_maxPos << std::endl;

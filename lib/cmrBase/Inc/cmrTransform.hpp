@@ -19,18 +19,18 @@ namespace cmr {
 class cmrTransform {
 public:
   cmrTransform() {
-    pos = cmrVector3d::Zero();
-    rot = cmrMatrix3d::Identity();
+    m_pos = cmrVector3d::Zero();
+    m_rot = cmrMatrix3d::Identity();
   }
 
-  cmrVector3d pos;
-  cmrMatrix3d rot;
+  cmrVector3d m_pos;
+  cmrMatrix3d m_rot;
 
   //! get transform rot from rpy euler angel
   void setRotWihtRPY(double roll, double pitch, double yaw) {
-    rot = cmrAngleAxis(yaw, cmrVector3d::UnitZ()) *
-          cmrAngleAxis(pitch, cmrVector3d::UnitY()) *
-          cmrAngleAxis(roll, cmrVector3d::UnitX());
+    m_rot = cmrAngleAxis(yaw, cmrVector3d::UnitZ()) *
+            cmrAngleAxis(pitch, cmrVector3d::UnitY()) *
+            cmrAngleAxis(roll, cmrVector3d::UnitX());
   }
 };
 } // namespace cmr

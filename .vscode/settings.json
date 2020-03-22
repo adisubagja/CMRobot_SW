@@ -5,6 +5,14 @@
         "ratio": "cpp",
         "dense": "cpp",
         "limits": "cpp",
-        "iostream": "cpp"
+        "iostream": "cpp",
+        "*.tcc": "cpp",
+        "ios": "cpp",
+        "type_traits": "cpp",
+        "functional": "cpp",
+        "memory": "cpp",
+        "xmemory": "cpp",
+        "xutility": "cpp",
+        "sstream": "cpp"
     }
 }

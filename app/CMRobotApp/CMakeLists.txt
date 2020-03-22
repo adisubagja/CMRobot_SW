@@ -14,7 +14,7 @@ include_directories(${PROJECT_SOURCE_DIR}/lib/cmrParser/Inc)
 # add the directories of linked libs
 link_directories(${PROJECT_SOURCE_DIR}/build/lib )
 
-add_executable(Test ${SRC_FILES})
+add_executable(CMRobotApp ${SRC_FILES})
 
 # set link libs
 set(LIBS_LINKED ${LIBS_LINKED} testLib)
@@ -25,5 +25,5 @@ set(LIBS_LINKED ${LIBS_LINKED} cmrParser)
 set(LIBS_LINKED ${LIBS_LINKED} tinyxml2)
 
 # add linked libs
-target_link_libraries(Test ${LIBS_LINKED})
+target_link_libraries(CMRobotApp ${LIBS_LINKED})
 

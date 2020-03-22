@@ -114,6 +114,13 @@ struct cmrJointData {
   void printInfo();
 };
 
+//! robot control point  data
+struct cmrTcpData {
+  std::string m_parentLink;
+  cmrVector3d m_posInParent;
+  cmrMatrix3d m_rotInParent;
+};
+
 //! robot defined data
 struct cmrRobotData {
   cmrRobotData() : m_robotDoFs(0) {}
@@ -126,29 +133,32 @@ struct cmrRobotData {
     m_gravity << 0, 0, -9.8;
   }
 
-  //! robot name
+  // robot name
   std::string m_robotName;
 
-  //! robot dofs
+  // robot dofs
   unsigned int m_robotDoFs;
 
-  //! gravity
+  // gravity
   cmrVector3d m_gravity;
 
-  //! link data
+  // link data
   std::vector<cmrLinkData> m_linksData;
 
-  //! joint data
+  // joint data
   std::vector<cmrJointData> m_jointsData;
 
-  //! print link info
+  // control point data
+  cmrTcpData m_tcpData;
+
+  // print link info
   void printInfo();
 
-  //! get joint data with parent link name
+  // get joint data with parent link name
   const cmrJointData *
   getChildJointData(const std::string &parentLinkName) const;
 
-  //! get joint child link data
+  // get joint child link data
   const cmrLinkData *getChildLinkData(const cmrJointData *jointDataPtr) const;
 };
 

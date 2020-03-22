@@ -2,7 +2,7 @@
 <!--A "Base" link must be defined-->>
 <!-- All the link should be name as "LinkX",X start form 1 -->
 <!-- FVR ROBOT DATA -->
-<robot name="fvrRobot">
+<robot name="flexivRobot">
   <link name="Base">
     <visual>
         <geometry>

@@ -4,6 +4,7 @@
 #############################################################
 
 # add all the source file to variable SRC_FILE
+set(SRC_FILES ${SRC_FILES} ${CMAKE_CURRENT_SOURCE_DIR}/Src/cmrParser.cpp)
 set(SRC_FILES ${SRC_FILES} ${CMAKE_CURRENT_SOURCE_DIR}/Src/cmrURDFParser.cpp)
 
 # add the directories of relative head files

@@ -15,8 +15,6 @@
 
 namespace cmr {
 
-//! constant value
-
 //！define matrix
 typedef Eigen::Matrix<double, 2, 2> cmrMatrix2d;
 typedef Eigen::Matrix<float, 2, 2> cmrMatrix2f;

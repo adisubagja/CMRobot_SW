@@ -1,7 +1,7 @@
 /*
  * cmrURDFParser.hpp
  *
- * Description: This file provide parser for robot URDF file,
+ * Description: This file provide parser for robot URDF file
  *
  * WARNING: Now Only Seriel Robots Are Supported
  *
@@ -27,8 +27,6 @@ public:
   ~cmrURDFParser();
 
   //! parse URDF file
-  //! Inpute: string of URDF file name
-  //! Output: cmrRobotData Struct
   cmrErrorType parseURDF(const std::string &URDFFileName,
                          cmrRobotData *robotDataPtr);
 

@@ -24,21 +24,22 @@ cmrURDFParser::~cmrURDFParser() {}
 //! Output: cmrRobotData Struct
 cmrErrorType cmrURDFParser::parseURDF(const string &URDFFileName,
                                       cmrRobotData *robotData) {
-  //! init robot data struct
-  robotData->init();
 
-  //! load URDF file
+  //! clear robot data
+  robotData->m_linksData.clear();
+  robotData->m_jointsData.clear();
+
+  // load URDF file
   XMLDocument URDFFile;
   XMLError errorId = URDFFile.LoadFile(URDFFileName.c_str());
   if (errorId != XML_SUCCESS) {
     string msg = "Could not open URDF file " + URDFFileName;
     throw cmrException(msg);
   };
-  //! get robotroot element
+  // get robotroot element
   XMLElement *robotRootElement = URDFFile.RootElement();
-  robotData->m_robotName = robotRootElement->FirstAttribute()->Value();
 
-  //! get all the links data iteratively
+  // get all the links data iteratively
   cmrLinkData linkData;
   XMLElement *curLinkElement;
   bool baseLinkDefined = false;
@@ -55,7 +56,7 @@ cmrErrorType cmrURDFParser::parseURDF(const string &URDFFileName,
     throw cmrException(msg);
   }
 
-  // ! get all the joints data iteratively
+  // get all the joints data iteratively
   cmrJointData jointData;
   XMLElement *curJointElement;
   while (curJointElement = robotRootElement->FirstChildElement("joint")) {
@@ -71,7 +72,7 @@ cmrErrorType cmrURDFParser::parseURDF(const string &URDFFileName,
 //! parse link Data
 cmrErrorType cmrURDFParser::parseLinkData(const XMLElement *curLinkElement,
                                           cmrLinkData &linkData) {
-  //! get attribute of link name
+  // get attribute of link name
   string name = curLinkElement->FirstAttribute()->Value();
   if (name.empty()) {
     string msg = "No link name is defined in URDF file";
@@ -79,70 +80,66 @@ cmrErrorType cmrURDFParser::parseLinkData(const XMLElement *curLinkElement,
   }
   linkData.m_linkName = name;
 
-  //! get geometry file and origin
-  const XMLElement *visualElement;
-  if (visualElement = curLinkElement->FirstChildElement("visual")) {
-    //! geometry file
-    const XMLElement *meshElement =
-        visualElement->FirstChildElement("geometry")->FirstChildElement();
-    linkData.m_geometryFilePath = meshElement->FirstAttribute()->Value();
+  // get geometry file and origin
+  const XMLElement *visualElement = curLinkElement->FirstChildElement("visual");
+  _NULLPOINTER_CHECK(visualElement, "No visual element in URDF file");
 
-    //! geometry origin
-    const XMLElement *originElement =
-        visualElement->FirstChildElement("origin");
-    std::istringstream xyz(originElement->FindAttribute("xyz")->Value());
-    xyz >> linkData.m_geometryOrigin.pos[0] >>
-        linkData.m_geometryOrigin.pos[1] >> linkData.m_geometryOrigin.pos[2];
-    std::istringstream rpy(originElement->FindAttribute("rpy")->Value());
-    double roll, pitch, yaw;
-    rpy >> roll >> pitch >> yaw;
-    linkData.m_geometryOrigin.setRotWihtRPY(roll, pitch, yaw);
-  } else {
-    string msg = "No visual element in URDF file";
-    throw cmrException(msg);
-  }
+  // geometry file
+  const XMLElement *meshElement =
+      visualElement->FirstChildElement("geometry")->FirstChildElement();
+  linkData.m_geometryFilePath = meshElement->FirstAttribute()->Value();
+
+  // geometry origin
+  const XMLElement *geometryOriginElement =
+      visualElement->FirstChildElement("origin");
+  std::istringstream geometry_xyz(
+      geometryOriginElement->FindAttribute("xyz")->Value());
+  geometry_xyz >> linkData.m_geometryOrigin.m_pos[0] >>
+      linkData.m_geometryOrigin.m_pos[1] >> linkData.m_geometryOrigin.m_pos[2];
+  std::istringstream geometry_rpy(
+      geometryOriginElement->FindAttribute("rpy")->Value());
+  double roll, pitch, yaw;
+  geometry_rpy >> roll >> pitch >> yaw;
+  linkData.m_geometryOrigin.setRotWihtRPY(roll, pitch, yaw);
 
   //! get inertial parameters
-  const XMLElement *inertialElement;
-  if (inertialElement = curLinkElement->FirstChildElement("inertial")) {
-    //! mass center origin
-    const XMLElement *originElement =
-        inertialElement->FirstChildElement("origin");
-    std::istringstream xyz(originElement->FindAttribute("xyz")->Value());
-    std::istringstream rpy(originElement->FindAttribute("rpy")->Value());
-    xyz >> linkData.m_massCenterOrigin.pos[0] >>
-        linkData.m_massCenterOrigin.pos[1] >>
-        linkData.m_massCenterOrigin.pos[2];
-    double roll, pitch, yaw;
-    rpy >> roll >> pitch >> yaw;
-    linkData.m_massCenterOrigin.setRotWihtRPY(roll, pitch, yaw);
+  const XMLElement *inertialElement =
+      curLinkElement->FirstChildElement("inertial");
+  _NULLPOINTER_CHECK(inertialElement, "No inertial element in URDF file");
 
-    //! mass
-    const XMLElement *massElement = inertialElement->FirstChildElement("mass");
-    std::istringstream mass(massElement->FirstAttribute()->Value());
-    mass >> linkData.m_linkMass;
+  // mass center origin
+  const XMLElement *massOriginElement =
+      inertialElement->FirstChildElement("origin");
+  std::istringstream mass_xyz(massOriginElement->FindAttribute("xyz")->Value());
+  std::istringstream mass_rpy(massOriginElement->FindAttribute("rpy")->Value());
+  mass_xyz >> linkData.m_massCenterOrigin.m_pos[0] >>
+      linkData.m_massCenterOrigin.m_pos[1] >>
+      linkData.m_massCenterOrigin.m_pos[2];
+  mass_rpy >> roll >> pitch >> yaw;
+  linkData.m_massCenterOrigin.setRotWihtRPY(roll, pitch, yaw);
 
-    //! inertia
-    const XMLElement *inertiaElement =
-        inertialElement->FirstChildElement("inertia");
-    double Ixx = std::stod(inertiaElement->FindAttribute("ixx")->Value());
-    double Iyy = std::stod(inertiaElement->FindAttribute("iyy")->Value());
-    double Izz = std::stod(inertiaElement->FindAttribute("izz")->Value());
-    double Ixy = std::stod(inertiaElement->FindAttribute("ixy")->Value());
-    double Ixz = std::stod(inertiaElement->FindAttribute("ixz")->Value());
-    double Iyz = std::stod(inertiaElement->FindAttribute("iyz")->Value());
-    linkData.m_inertia << Ixx, Ixy, Ixz, Ixy, Iyy, Iyz, Ixz, Iyz, Izz;
-  } else {
-    string msg = "No inertial element in URDF file";
-    throw cmrException(msg);
-  }
+  // mass
+  const XMLElement *massElement = inertialElement->FirstChildElement("mass");
+  std::istringstream mass(massElement->FirstAttribute()->Value());
+  mass >> linkData.m_linkMass;
+
+  // inertia
+  const XMLElement *inertiaElement =
+      inertialElement->FirstChildElement("inertia");
+  double Ixx = std::stod(inertiaElement->FindAttribute("ixx")->Value());
+  double Iyy = std::stod(inertiaElement->FindAttribute("iyy")->Value());
+  double Izz = std::stod(inertiaElement->FindAttribute("izz")->Value());
+  double Ixy = std::stod(inertiaElement->FindAttribute("ixy")->Value());
+  double Ixz = std::stod(inertiaElement->FindAttribute("ixz")->Value());
+  double Iyz = std::stod(inertiaElement->FindAttribute("iyz")->Value());
+  linkData.m_inertia << Ixx, Ixy, Ixz, Ixy, Iyy, Iyz, Ixz, Iyz, Izz;
 
   return CMR_SUCCESS;
 }
 //! parse joint Data
 cmrErrorType cmrURDFParser::parseJointData(const XMLElement *curJointElement,
                                            cmrJointData &jointData) {
-  //! get attribute of joint name
+  // get attribute of joint name
   string name = curJointElement->FindAttribute("name")->Value();
   if (name.empty()) {
     string msg = "No joint name or type is defined in URDF file";
@@ -150,7 +147,7 @@ cmrErrorType cmrURDFParser::parseJointData(const XMLElement *curJointElement,
   }
   jointData.m_jointName = name;
 
-  //! get joint type
+  // get joint type
   string type = curJointElement->FindAttribute("type")->Value();
   bool findJointType = false;
   for (int jointType = 0; jointType < CMR_JOINTTYPE_NUM; jointType++) {
@@ -184,7 +181,7 @@ cmrErrorType cmrURDFParser::parseJointData(const XMLElement *curJointElement,
     throw cmrException(msg);
   }
 
-  //! joint axis
+  // joint axis
   const XMLElement *axisElement = curJointElement->FirstChildElement("axis");
   if (axisElement) {
     std::istringstream xyz(axisElement->FirstAttribute()->Value());
@@ -195,7 +192,7 @@ cmrErrorType cmrURDFParser::parseJointData(const XMLElement *curJointElement,
     throw cmrException(msg);
   }
 
-  //! joint parent and child
+  // joint parent and child
   const XMLElement *parentElement =
       curJointElement->FirstChildElement("parent");
   const XMLElement *childElement = curJointElement->FirstChildElement("child");
@@ -207,41 +204,33 @@ cmrErrorType cmrURDFParser::parseJointData(const XMLElement *curJointElement,
     throw cmrException(msg);
   }
 
-  //！ joint origin
+  // joint origin
   const XMLElement *originElement =
       curJointElement->FirstChildElement("origin");
-  if (originElement) {
-    std::istringstream xyz(originElement->FindAttribute("xyz")->Value());
-    std::istringstream rpy(originElement->FindAttribute("rpy")->Value());
-    xyz >> jointData.m_jointOrigin.pos[0] >> jointData.m_jointOrigin.pos[1] >>
-        jointData.m_jointOrigin.pos[2];
-    double roll, pitch, yaw;
-    rpy >> roll >> pitch >> yaw;
-    jointData.m_jointOrigin.setRotWihtRPY(roll, pitch, yaw);
-  } else {
-    string msg = "No joint origin link is defined!";
-    throw cmrException(msg);
-  }
+  _NULLPOINTER_CHECK(originElement, "No joint origin is defined!");
 
-  //! joint limit
+  std::istringstream xyz(originElement->FindAttribute("xyz")->Value());
+  std::istringstream rpy(originElement->FindAttribute("rpy")->Value());
+  xyz >> jointData.m_jointOrigin.m_pos[0] >> jointData.m_jointOrigin.m_pos[1] >>
+      jointData.m_jointOrigin.m_pos[2];
+  double roll, pitch, yaw;
+  rpy >> roll >> pitch >> yaw;
+  jointData.m_jointOrigin.setRotWihtRPY(roll, pitch, yaw);
+
+  // joint limit
   const XMLElement *limitElement = curJointElement->FirstChildElement("limit");
-  if (limitElement) {
-    jointData.m_maxEffort =
-        std::stod(limitElement->FindAttribute("effort")->Value());
-    jointData.m_maxVelocity =
-        std::stod(limitElement->FindAttribute("velocity")->Value());
-    jointData.m_minPos =
-        std::stod(limitElement->FindAttribute("lower")->Value());
-    jointData.m_maxPos =
-        std::stod(limitElement->FindAttribute("upper")->Value());
-  } else {
-    string msg = "No joint limit link is defined!";
-    throw cmrException(msg);
-  }
+  _NULLPOINTER_CHECK(limitElement, "No joint limit is defined!");
+  jointData.m_maxEffort =
+      std::stod(limitElement->FindAttribute("effort")->Value());
+  jointData.m_maxVelocity =
+      std::stod(limitElement->FindAttribute("velocity")->Value());
+  jointData.m_minPos = std::stod(limitElement->FindAttribute("lower")->Value());
+  jointData.m_maxPos = std::stod(limitElement->FindAttribute("upper")->Value());
 
-  //! joint dynamics
+  // joint dynamics
   const XMLElement *dynamicsElement =
       curJointElement->FirstChildElement("dynamics");
+
   if (dynamicsElement) {
     jointData.m_damping =
         std::stod(dynamicsElement->FindAttribute("damping")->Value());
