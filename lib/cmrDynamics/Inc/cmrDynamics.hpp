@@ -14,6 +14,7 @@
 #include "cmrException.hpp"
 #include "cmrRobotData.hpp"
 #include "rbdl/rbdl.h"
+#include <unordered_map>
 
 namespace cmr{
 
@@ -27,7 +28,14 @@ public:
   cmrErrorType createRobotModel(const cmrRobotData &robotData);
 
   //! get robot DoFs
-  inline unsigned int getRobotDoFs() { return m_robotDoFs; };
+  inline unsigned int getRobotDoFs() { return m_robotDoFs; }
+
+  //! get link id
+  unsigned int getLinkId(std::string linkName);
+
+  //! get tcp transform
+  cmrTransform getTcpTransform(const cmrVectorXd &jointPos);
+
   //! get rbdl joint type
   RigidBodyDynamics::JointType getChildJointType(cmrJointType jointType);
 
@@ -44,9 +52,9 @@ public:
 
   //! get point coordinate in world coordinate with point transform in specific
   //! link coordinate
-  cmrTransform getPointTranform(const cmrVectorXd &jointPos,
-                                unsigned int linkId,
-                                const cmrTransform &transInLink);
+  cmrTransform getPointTransform(const cmrVectorXd &jointPos,
+                                 unsigned int linkId,
+                                 const cmrTransform &transInLink);
 
   //! get point jacobian with point position in specific link coordinate
   cmrMatrixXd getPointJacobian(const cmrVectorXd &jointPos, unsigned int linkId,
@@ -62,6 +70,12 @@ public:
 private:
   //! robot model
   RigidBodyDynamics::Model *m_robotModel;
+
+  //! link name and id map
+  std::unordered_map<std::string, unsigned int> m_linkNameIdMap;
+
+  //! tcp link id
+  unsigned int m_tcpLinkId;
 
   //! robot DoFs
   unsigned int m_robotDoFs;

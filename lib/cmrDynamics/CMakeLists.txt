@@ -10,7 +10,8 @@ include_directories(${CMAKE_CURRENT_SOURCE_DIR}/Inc)
 include_directories(${CMAKE_CURRENT_SOURCE_DIR}/../cmrBase/Inc)
 
 # set dependent libs
-set(LIB_FILES ${LIBK_FILES} rbdl)
+set(LIB_FILES ${LIB_FILES} rbdl)
+set(LIB_FILES ${LIB_FILES} cmrBase)
 
 add_library(cmrDynamics ${SRC_FILES})
 

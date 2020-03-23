@@ -36,22 +36,22 @@ cmrErrorType cmrParser::parseRobotCfgFile(const std::string &robotCfgFile,
 
   // get robot name
   XMLElement *robotNameElement = robotElement->FirstChildElement("robot_name");
-  _NULLPOINTER_CHECK(robotNameElement,
+  _CHECK_NULLPOINTER(robotNameElement,
                      "Could not find robot_name element in config file");
-  robotDataPtr->m_robotName = robotNameElement->Value();
+  robotDataPtr->m_robotName = robotNameElement->FirstChild()->Value();
 
   // parse robot urdf file
   XMLElement *robotURDFElement = robotElement->FirstChildElement("robot_urdf");
-  _NULLPOINTER_CHECK(robotURDFElement,
+  _CHECK_NULLPOINTER(robotURDFElement,
                      "Could not find robot_urdf element in config file");
-  std::string urdfFile = robotURDFElement->Value();
+  std::string urdfFile = robotURDFElement->FirstChild()->Value();
   m_urdfParser.parseURDF(urdfFile, robotDataPtr);
 
   // parse robot gravity
   XMLElement *gravityElement = robotElement->FirstChildElement("gravity");
-  _NULLPOINTER_CHECK(gravityElement,
+  _CHECK_NULLPOINTER(gravityElement,
                      "Could not find gravity element in config file");
-  std::istringstream gravityStr(gravityElement->Value());
+  std::istringstream gravityStr(gravityElement->FirstChild()->Value());
   gravityStr >> robotDataPtr->m_gravity[0] >> robotDataPtr->m_gravity[1] >>
       robotDataPtr->m_gravity[2];
 
@@ -60,15 +60,15 @@ cmrErrorType cmrParser::parseRobotCfgFile(const std::string &robotCfgFile,
 
   // parse tcp parent link
   XMLElement *tcpParentLink = tcpElement->FirstChildElement("parent_link_name");
-  _NULLPOINTER_CHECK(tcpParentLink, "Could not find tcp parent In config file");
-  robotDataPtr->m_tcpData.m_parentLink = tcpParentLink->Value();
+  _CHECK_NULLPOINTER(tcpParentLink, "Could not find tcp parent In config file");
+  robotDataPtr->m_tcpData.m_parentLink = tcpParentLink->FirstChild()->Value();
 
   // parse tcp position in parent link
   XMLElement *tcpPosInParentLink =
       tcpElement->FirstChildElement("position_in_link");
-  _NULLPOINTER_CHECK(tcpPosInParentLink,
+  _CHECK_NULLPOINTER(tcpPosInParentLink,
                      "Could not find tcp position in link In config file");
-  std::istringstream tcpPos(tcpPosInParentLink->Value());
+  std::istringstream tcpPos(tcpPosInParentLink->FirstChild()->Value());
   tcpPos >> robotDataPtr->m_tcpData.m_posInParent(0) >>
       robotDataPtr->m_tcpData.m_posInParent(1) >>
       robotDataPtr->m_tcpData.m_posInParent(2);
@@ -76,9 +76,9 @@ cmrErrorType cmrParser::parseRobotCfgFile(const std::string &robotCfgFile,
   // parse tcp orientation in parent link
   XMLElement *tcpOriInParentLink =
       tcpElement->FirstChildElement("orientation_in_link");
-  _NULLPOINTER_CHECK(tcpPosInParentLink,
+  _CHECK_NULLPOINTER(tcpPosInParentLink,
                      "Could not find tcp orientation in link In config file");
-  std::istringstream tcpOri(tcpPosInParentLink->Value());
+  std::istringstream tcpOri(tcpPosInParentLink->FirstChild()->Value());
   double quat_w, quat_x, quat_y, quat_z;
   tcpPos >> quat_w >> quat_x >> quat_y >> quat_z;
   cmrQuat tcpQuat(quat_w, quat_x, quat_y, quat_z);

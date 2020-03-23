@@ -32,7 +32,17 @@ public:
             cmrAngleAxis(pitch, cmrVector3d::UnitY()) *
             cmrAngleAxis(roll, cmrVector3d::UnitX());
   }
+
+  //! convert transform to string format
+  std::string toStr() {
+    std::ostringstream transStr;
+    transStr << "\n Translation is: \n " << m_pos.transpose();
+    transStr << "\n Orientation is: \n" << m_rot << std::endl;
+
+    return transStr.str();
+  }
 };
+
 } // namespace cmr
 
 #endif

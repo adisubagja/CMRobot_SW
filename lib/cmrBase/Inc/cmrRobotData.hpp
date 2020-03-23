@@ -37,6 +37,10 @@ const std::string g_cmrJointTypeName[6] = {
 //! robot base link name
 const std::string g_baseLinkName = "Base";
 
+//! robot target control point link name
+//! We take the target control point as a "link" without size and mass
+const std::string g_tcpLinkName = "TcpLink";
+
 //! link defined data
 struct cmrLinkData {
   cmrLinkData() : m_linkMass(0) { m_inertia = cmrMatrix3d::Constant(1e-6); }

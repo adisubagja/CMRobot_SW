@@ -15,21 +15,24 @@ using std::string;
 
 namespace cmr {
 
-cmrDynamics::cmrDynamics() : m_robotModel{nullptr}, m_robotDoFs{0} {};
+cmrDynamics::cmrDynamics()
+    : m_robotModel{nullptr}, m_robotDoFs{0}, m_tcpLinkId{0} {};
 
 cmrDynamics::~cmrDynamics() { delete m_robotModel; };
 
 //! creat robot model with urdf file
 cmrErrorType cmrDynamics::createRobotModel(const cmrRobotData &robotData) {
+  // creat robot model
   m_robotModel = new RigidBodyDynamics::Model();
+  m_linkNameIdMap.clear();
 
-  //! set gravity
+  // set gravity
   m_robotModel->gravity = robotData.m_gravity;
 
-  //! set DoFs
+  // set DoFs
   m_robotDoFs = robotData.m_robotDoFs;
 
-  //! add base link first
+  // add base link first
   unsigned int baseLinkId = 0;
   Body body_base;
   for (const auto &link : robotData.m_linksData) {
@@ -39,46 +42,81 @@ cmrErrorType cmrDynamics::createRobotModel(const cmrRobotData &robotData) {
       body_base = Body(link.m_linkMass, linkCOM, linkInertia);
     }
   }
-
-  //! fixed joint for base link
+  cmrMatrix3d rot = cmrMatrix3d::Identity();
+  // fixed joint for base link
   Joint joint_base = Joint(RigidBodyDynamics::JointTypeFixed);
   baseLinkId = m_robotModel->AddBody(
       0, RigidBodyDynamics::Math::Xtrans(Vector3d(0, 0, 0)), joint_base,
       body_base, g_baseLinkName);
 
-  //! add following links and joints in sequence
+  // add following links and joints in sequence
   string parentLinkName = g_baseLinkName;
-  unsigned int lastLinkId = baseLinkId;
+  unsigned int parentLinkId = baseLinkId;
   const cmrJointData *curAddJointData = nullptr;
 
-  //! if current link is connect to another joint
+  // if current link is connect to another joint
   while (curAddJointData = robotData.getChildJointData(parentLinkName)) {
-    //! get next link
+    // get next link
     const cmrLinkData *curAddLinkData =
         robotData.getChildLinkData(curAddJointData);
     Vector3d linkCOM = curAddLinkData->m_massCenterOrigin.m_pos;
     Matrix3d linkInertia = curAddLinkData->m_inertia;
     Body curAddBody = Body(curAddLinkData->m_linkMass, linkCOM, linkInertia);
+    std::string curAddLinkName = curAddLinkData->m_linkName;
 
-    //! get next joint
+    // get next joint
     RigidBodyDynamics::JointType curAddJointType =
         getChildJointType(curAddJointData->m_jointType);
     Vector3d curAddJointAxis = curAddJointData->m_jointAxis;
     Joint curAddJoint = Joint(curAddJointType, curAddJointAxis);
 
-    //! set joint transform to parent link
+    // set joint transform to parent link
+    // Info: Here the joint rot is transposed, to be compatible with RBDL
+    // interface
     SpatialTransform curAddJointTrans;
-    curAddJointTrans.E = curAddJointData->m_jointOrigin.m_rot;
+    curAddJointTrans.E = curAddJointData->m_jointOrigin.m_rot.transpose();
     curAddJointTrans.r = curAddJointData->m_jointOrigin.m_pos;
     unsigned int curLinkId =
-        m_robotModel->AddBody(lastLinkId, curAddJointTrans, curAddJoint,
-                              curAddBody, curAddLinkData->m_linkName);
+        m_robotModel->AddBody(parentLinkId, curAddJointTrans, curAddJoint,
+                              curAddBody, curAddLinkName);
 
-    //! update link id
-    lastLinkId = curLinkId;
+    // add link name and id to map
+    m_linkNameIdMap.insert(std::unordered_map<string, unsigned int>::value_type(
+        curAddLinkName, curLinkId));
+
+    // update paretn link name and id
+    parentLinkName = curAddLinkName;
+    parentLinkId = curLinkId;
   }
 
+  // add target control point to robot model
+  unsigned int tcpParentLinkId = getLinkId(robotData.m_tcpData.m_parentLink);
+  SpatialTransform tcpTrans;
+  tcpTrans.E = robotData.m_tcpData.m_rotInParent;
+  tcpTrans.r = robotData.m_tcpData.m_posInParent;
+  Vector3d tcpCOM = Vector3d::Zero();
+  Matrix3d tcpInertial = Matrix3d::Zero();
+  Body tcpLink = Body(0.0, tcpCOM, tcpInertial);
+
+  m_tcpLinkId = m_robotModel->AddBody(tcpParentLinkId, tcpTrans,
+                                      Joint(RigidBodyDynamics::JointTypeFixed),
+                                      tcpLink, g_tcpLinkName);
+
+  // add tcp link id to map
+  m_linkNameIdMap.insert(std::unordered_map<string, unsigned int>::value_type(
+      g_tcpLinkName, m_tcpLinkId));
+
   return CMR_SUCCESS;
+}
+
+//! get link id
+unsigned int cmrDynamics::getLinkId(std::string linkName) {
+  auto mapIt = m_linkNameIdMap.find(linkName);
+
+  if (m_linkNameIdMap.end() == mapIt) {
+    throw cmrException("Can no find " + linkName);
+  }
+  return mapIt->second;
 }
 
 //! get rbdl joint type
@@ -87,7 +125,7 @@ cmrDynamics::getChildJointType(cmrJointType jointType) {
   RigidBodyDynamics::JointType rbdlJointType =
       RigidBodyDynamics::JointTypeUndefined;
 
-  //! get rbdl joint type
+  // get rbdl joint type
   switch (jointType) {
   case CMR_JOINT_FIXED:
     rbdlJointType = RigidBodyDynamics::JointTypeFixed;
@@ -121,7 +159,8 @@ cmrErrorType cmrDynamics::updataRobotKinematic(const cmrVectorXd &jointPos) {
 
   // check if robot model is created
   if (!m_robotModel) {
-    throw cmrException("robot model is not initialized");
+    throw cmrException("robot model is not initialized"); //! get tcp transform
+    cmrTransform getTcpTransform(const cmrVectorXd &jointPos);
   }
 
   //! update kinematic
@@ -159,9 +198,9 @@ cmrMatrix3d cmrDynamics::getLinkOriInWrd(const cmrVectorXd &jointPos,
 }
 
 //! get point coordinate with point transform in specific link coordinate
-cmrTransform cmrDynamics::getPointTranform(const cmrVectorXd &jointPos,
-                                           unsigned int linkId,
-                                           const cmrTransform &transInLink) {
+cmrTransform cmrDynamics::getPointTransform(const cmrVectorXd &jointPos,
+                                            unsigned int linkId,
+                                            const cmrTransform &transInLink) {
   cmrTransform pointTrans;
   // get point pos
   pointTrans.m_pos = getPointPosInWrd(jointPos, linkId, transInLink.m_pos);
@@ -170,6 +209,12 @@ cmrTransform cmrDynamics::getPointTranform(const cmrVectorXd &jointPos,
   pointTrans.m_rot = getLinkOriInWrd(jointPos, linkId);
 
   return pointTrans;
+}
+
+//! get tcp transform
+cmrTransform cmrDynamics::getTcpTransform(const cmrVectorXd &jointPos) {
+  cmrTransform zeroTrans;
+  return getPointTransform(jointPos, m_tcpLinkId, zeroTrans);
 }
 
 //! get point jacobian with point position in specific link coordinate
