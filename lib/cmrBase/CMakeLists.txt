@@ -10,9 +10,9 @@ set(SRC_FILES ${SRC_FILES} ${CMAKE_CURRENT_SOURCE_DIR}/Src/cmrRobotData.cpp)
 include_directories(${CMAKE_CURRENT_SOURCE_DIR}/Inc)
 
 # set dependent libs
-#set(LIB_FILES ${LIBS_LINKED} ***)
+#set(LIB_LINKED ${LIBS_LINKED} ***)
 
 add_library(cmrBase ${SRC_FILES})
 
 # add linked libs
-#target_link_libraries(cmrDynamics ${LIBS_LINKED})
+#target_link_libraries(*** ${LIBS_LINKED})

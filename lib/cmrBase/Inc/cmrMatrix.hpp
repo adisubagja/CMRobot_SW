@@ -1,5 +1,5 @@
 /*
- * cmrMath.hpp
+ * cmrMatrix.hpp
  *
  * Description: This file provide variable math function,
  * mainly about matrix and vector computation
@@ -8,8 +8,8 @@
  * Data: 2020.2.13
  */
 
-#ifndef CMRMATH_HPP_
-#define CMRMATH_HPP_
+#ifndef CMRMATRIX_HPP_
+#define CMRMATRIX_HPP_
 
 #include "Eigen/Dense"
 
@@ -48,14 +48,17 @@ typedef Eigen::Matrix<int, Eigen::Dynamic, Eigen::Dynamic> cmrMatrixXi;
 typedef Eigen::Matrix<double, 3, 1> cmrVector3d;
 typedef Eigen::Matrix<float, 3, 1> cmrVector3f;
 typedef Eigen::Matrix<double, 3, 1> cmrVector3i;
+typedef Eigen::Matrix<bool, 3, 1> cmrVector3b;
 
 typedef Eigen::Matrix<double, 6, 1> cmrVector6d;
 typedef Eigen::Matrix<float, 6, 1> cmrVector6f;
 typedef Eigen::Matrix<double, 6, 1> cmrVector6i;
+typedef Eigen::Matrix<bool, 6, 1> cmrVector6b;
 
 typedef Eigen::Matrix<double, Eigen::Dynamic, 1> cmrVectorXd;
 typedef Eigen::Matrix<float, Eigen::Dynamic, 1> cmrVectorXf;
 typedef Eigen::Matrix<double, Eigen::Dynamic, 1> cmrVectorXi;
+typedef Eigen::Matrix<bool, Eigen::Dynamic, 1> cmrVectorXb;
 
 //! define row vecotr
 typedef Eigen::Matrix<double, 1, 3> cmrRowVector3d;

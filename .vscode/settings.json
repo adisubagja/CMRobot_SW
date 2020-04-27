@@ -13,6 +13,8 @@
         "memory": "cpp",
         "xmemory": "cpp",
         "xutility": "cpp",
-        "sstream": "cpp"
+        "sstream": "cpp",
+        "typeinfo": "cpp",
+        "fstream": "cpp"
     }
 }

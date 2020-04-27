@@ -15,9 +15,9 @@ using std::string;
 
 namespace cmr {
 
-cmrDynamics::cmrDynamics() : m_robotModel{nullptr}, m_robotDoFs{0} {};
+cmrDynamics::cmrDynamics() : m_robotModel{nullptr}, m_robotDoFs{0} {}
 
-cmrDynamics::~cmrDynamics() { delete m_robotModel; };
+cmrDynamics::~cmrDynamics() { delete m_robotModel; }
 
 //! creat robot model with urdf file
 cmrErrorType cmrDynamics::createRobotModel(const cmrRobotData &robotData) {
@@ -77,6 +77,9 @@ cmrErrorType cmrDynamics::createRobotModel(const cmrRobotData &robotData) {
     //! update link id
     lastLinkId = curLinkId;
   }
+
+  // !!! TO DO
+  // add tcp to robot model
 
   return CMR_SUCCESS;
 }

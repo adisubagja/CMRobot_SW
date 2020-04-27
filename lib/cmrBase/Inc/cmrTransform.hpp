@@ -12,7 +12,7 @@
 #define CMRTRANSFORM_HPP_
 
 #include "baseStdLibs.hpp"
-#include "cmrMath.hpp"
+#include "cmrMatrix.hpp"
 
 namespace cmr {
 

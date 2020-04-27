@@ -8,7 +8,7 @@
 #include "baseStdLibs.hpp"
 #include "cmrDynamics.hpp"
 #include "cmrException.hpp"
-#include "cmrMath.hpp"
+#include "cmrMatrix.hpp"
 #include "cmrURDFParser.hpp"
 #include "multiThreadTest.hpp"
 #include "myHello.h"

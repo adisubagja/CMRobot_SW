@@ -1,9 +1,9 @@
 #############################################################
-# This is the CMakeLists file for all the final
+# This is the CMakeLists file for all the example
 # binary applilcation
 #############################################################
 
 
 # add all the app directories here to be compelled
-add_subdirectory(CMRobotApp)
-add_subdirectory(Example)
+add_subdirectory(filterTest)
+

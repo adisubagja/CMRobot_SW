@@ -8,4 +8,5 @@ add_subdirectory(test)
 add_subdirectory(cmrBase)
 add_subdirectory(cmrDynamics)
 add_subdirectory(cmrParser)
+add_subdirectory(cmrFilter)
 

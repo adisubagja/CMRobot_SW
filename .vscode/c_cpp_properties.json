@@ -4,9 +4,7 @@
             "name": "Win32",
             "includePath": [
                 "${workspaceFolder}/**",
-                "C:/Users/NQF/code_repos/**",
-                "C:/MinGW/lib/gcc",
-                "D:/ProgramFiles/VS/VC/include/**"
+                "C:/MinGW/lib/gcc"
             ],
             "defines": [
                 "_DEBUG",
