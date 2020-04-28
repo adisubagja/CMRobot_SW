@@ -1,8 +1,9 @@
 <?xml version="1.0"?>
-<!--A "Base" link must be defined-->>
+<!--A "Base" link must be defined-->
 <!-- All the link should be name as "LinkX",X start form 1 -->
 <!-- FVR ROBOT DATA -->
 <robot name="flexivRobot">
+<!--=====================Robot Base=========================-->
   <link name="Base">
     <visual>
         <geometry>
@@ -16,8 +17,9 @@
 		 <inertia ixx="0.006163"  ixy="-0.000025"  ixz="-0.000067" iyy="0.006283" iyz="-0.000048" izz="0.004321" />
 	 </inertial>
   </link>
-	
-   <link name="Link1">
+
+<!--=====================Robot Links=========================-->
+  <link name="Link1">
     <visual>
         <geometry>
           <mesh filename=".\graphics\Link\link1.STL"/>
@@ -30,14 +32,6 @@
 		 <inertia ixx="0.027446"  ixy="-0.000003"  ixz="0.000022" iyy="0.027415" iyz="-0.000866" izz="0.005702" />
 	 </inertial>
   </link>
-  <joint name="joint1" type="revolute">
-    <axis xyz="0 0 1"/>
-    <parent link="Base"/>
-    <child link="Link1"/>
-    <origin rpy="0 0 3.14" xyz="0.0 0.0 0.113700"/>
-    <limit effort="90" velocity="130" lower="-2.85" upper="2.85"/>
-    <dynamics damping="1.0" friction="0.5"/>
-  </joint>
 
   <link name="Link2">
     <visual>
@@ -52,14 +46,6 @@
 		 <inertia ixx="0.021277"  ixy=" 0.000002 "  ixz="0.000010" iyy=" 0.021694" iyz="-0.002064" izz=" 0.003095" />
 	 </inertial>
   </link>
-  <joint name="joint2" type="revolute">
-    <axis xyz="0 1 0"/>
-    <parent link="Link1"/>
-    <child link="Link2"/>
-    <origin rpy="0 -0.785 0" xyz="0.0 0.015 0.2113"/>
-    <limit effort="130" velocity="120" lower="-2.102" upper="2.102"/>
-    <dynamics damping="1.0" friction="0.0"/>
-  </joint>
 
   <link name="Link3">
     <visual>
@@ -74,14 +60,6 @@
 		 <inertia ixx="0.012855"  ixy=" 0.000038"  ixz=" -0.000713" iyy=" 0.012154" iyz="-0.000583" izz="0.003370" />
 	 </inertial>
   </link>
-  <joint name="joint3" type="revolute">
-    <axis xyz="0 0 1"/>
-    <parent link="Link2"/>
-    <child link="Link3"/>
-    <origin rpy="0 0 0" xyz="0.0 0.015  0.205"/>
-    <limit effort="150" velocity="50" lower="-2.878" upper="2.878"/>
-    <dynamics damping="1.0" friction="0.0"/>
-  </joint>
 
   <link name="Link4">
     <visual>
@@ -96,14 +74,6 @@
 		 <inertia ixx="0.015492"  ixy=" 0.000055"  ixz="0.000545" iyy="0.015639" iyz="0.001025" izz=" 0.002482" />
 	 </inertial>
   </link>
-  <joint name="joint4" type="revolute">
-    <axis xyz="0 1 0"/>
-    <parent link="Link3"/>
-    <child link="Link4"/>
-    <origin rpy="0 -0.785 0" xyz="-0.01 -0.025 0.19"/>
-    <limit effort="60" velocity="120" lower="-2.47" upper="1.963"/>
-    <dynamics damping="1.0" friction="0.0"/>
-  </joint>
 
   <link name="Link5">
     <visual>
@@ -118,16 +88,8 @@
 		 <inertia ixx="0.012199"  ixy="-0.000013"  ixz="0.000029" iyy="0.011381" iyz=" 0.000461" izz="0.003241" />
 	 </inertial>
   </link>
-  <joint name="joint5" type="revolute">
-    <axis xyz="0 0 1"/>
-    <parent link="Link4"/>
-    <child link="Link5"/>
-    <origin rpy="0 0 0" xyz="0.01 -0.02 0.195"/>
-    <limit effort="20" velocity="220" lower="-2.878" upper="2.878"/>
-    <dynamics damping="1.0" friction="0.0"/>
-  </joint>
-
- <link name="Link6">
+  
+  <link name="Link6">
     <visual>
         <geometry>
           <mesh filename=".\graphics\Link\link6.STL"/>
@@ -140,16 +102,8 @@
 		 <inertia ixx="0.005364"  ixy=" 0.000111"  ixz="-0.000699" iyy="0.006365" iyz="-0.000432" izz=" 0.003039" />
 	 </inertial>
   </link>
-  <joint name="joint6" type="revolute">
-    <axis xyz="0 1 0"/>
-    <parent link="Link5"/>
-    <child link="Link6"/>
-    <origin rpy="0 0 0" xyz="0.0 0.03 0.185"/>
-    <limit effort="20" velocity="220" lower="-1.325" upper="1.8316"/>
-    <dynamics damping="1.0" friction="0.0"/>
-  </joint>
 
- <link name="Link7">
+  <link name="Link7">
     <visual>
         <geometry>
           <mesh filename=".\graphics\Link\link7.STL"/>
@@ -162,11 +116,66 @@
 		 <inertia ixx="0.000888"  ixy=" 0.0"  ixz="0.0" iyy="0.000886" iyz="0.0" izz="0.000772" />
 	 </inertial>
   </link>
+<!--=====================Robot Joints=========================-->
+  <joint name="joint1" type="revolute">
+    <axis xyz="0 0 1"/>
+    <parent link="Base"/>
+    <child link="Link1"/>
+    <origin rpy="0 0 3.1415927" xyz="0.0 0.0 0.135"/>
+    <limit effort="90" velocity="130" lower="-2.85" upper="2.85"/>
+    <dynamics damping="1.0" friction="0.5"/>
+  </joint>
+
+  <joint name="joint2" type="revolute">
+    <axis xyz="0 1 0"/>
+    <parent link="Link1"/>
+    <child link="Link2"/>
+    <origin rpy="0 0 0" xyz="0.0 0.03 0.21"/>
+    <limit effort="130" velocity="120" lower="-2.102" upper="2.102"/>
+    <dynamics damping="1.0" friction="0.0"/>
+  </joint>
+
+  <joint name="joint3" type="revolute">
+    <axis xyz="0 0 1"/>
+    <parent link="Link2"/>
+    <child link="Link3"/>
+    <origin rpy="0 0 0" xyz="0.0 0.035  0.205"/>
+    <limit effort="150" velocity="50" lower="-2.878" upper="2.878"/>
+    <dynamics damping="1.0" friction="0.0"/>
+  </joint>
+
+  <joint name="joint4" type="revolute">
+    <axis xyz="0 1 0"/>
+    <parent link="Link3"/>
+    <child link="Link4"/>
+    <origin rpy="0 0 0" xyz="-0.02 -0.03 0.19"/>
+    <limit effort="60" velocity="120" lower="-2.47" upper="1.963"/>
+    <dynamics damping="1.0" friction="0.0"/>
+  </joint>
+
+  <joint name="joint5" type="revolute">
+    <axis xyz="0 0 1"/>
+    <parent link="Link4"/>
+    <child link="Link5"/>
+    <origin rpy="0 0 0" xyz="0.02 -0.025 0.195"/>
+    <limit effort="20" velocity="220" lower="-2.878" upper="2.878"/>
+    <dynamics damping="1.0" friction="0.0"/>
+  </joint>
+
+  <joint name="joint6" type="revolute">
+    <axis xyz="0 1 0"/>
+    <parent link="Link5"/>
+    <child link="Link6"/>
+    <origin rpy="0 0 0" xyz="0.0 0.03 0.19"/>
+    <limit effort="20" velocity="220" lower="-1.325" upper="1.8316"/>
+    <dynamics damping="1.0" friction="0.0"/>
+  </joint>
+
   <joint name="joint7" type="revolute">
     <axis xyz="0 0 1"/>
     <parent link="Link6"/>
     <child link="Link7"/>
-    <origin rpy="0 -1.57 0" xyz="-0.058263 0.0145 0.096"/>
+    <origin rpy="0 -1.5707963 0" xyz="-0.055 0.07 0.11"/>
     <limit effort="20" velocity="220" lower="-2.6167" upper="2.6167"/>
     <dynamics damping="1.0" friction="0.0"/>
   </joint>

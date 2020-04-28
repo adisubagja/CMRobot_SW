@@ -51,7 +51,7 @@ inline void _ERRORTYPE_CHECK(cmrErrorType errorType) {
 }
 
 //! check if a pointer is null
-template <typename T> inline void _NULLPOINTER_CHECK(T ptr, std::string msg) {
+template <typename T> inline void _CHECK_NULLPOINTER(T ptr, std::string msg) {
   assert(std::is_pointer<T>::value);
   if (!ptr) {
     throw cmrException(msg);

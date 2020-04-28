@@ -6,8 +6,8 @@
     ===================================================================================-->
     <robot>
         <robot_name> flexivRobot </robot_name>
-        <robot_urdf>.\robots\flexivRobot\flexivRobot.urdf</robot_urdf>
-        <gravit>0.0,0.0,-9.8 </gravit>
+        <robot_urdf>../config/robotCfg/flexivRobot.urdf</robot_urdf>
+        <gravity>0.0,0.0,-9.8 </gravity>
         <robot_type>Flexiv</robot_type>
     </robot>
 

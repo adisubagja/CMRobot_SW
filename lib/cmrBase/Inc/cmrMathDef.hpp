@@ -17,5 +17,9 @@ const double g_controlCycleTime = 0.001;
 //! define pi
 const double g_cmrPI = 3.1415926;
 
+//! unit convertion function
+#define _DegToRad(deg) (deg * M_PI / 180.0);
+#define _RadToDeg(rad) (rad * 180.0 / M_PI);
+
 } // namespace cmr
 #endif

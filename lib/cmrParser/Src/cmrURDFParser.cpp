@@ -82,7 +82,7 @@ cmrErrorType cmrURDFParser::parseLinkData(const XMLElement *curLinkElement,
 
   // get geometry file and origin
   const XMLElement *visualElement = curLinkElement->FirstChildElement("visual");
-  _NULLPOINTER_CHECK(visualElement, "No visual element in URDF file");
+  _CHECK_NULLPOINTER(visualElement, "No visual element in URDF file");
 
   // geometry file
   const XMLElement *meshElement =
@@ -105,7 +105,7 @@ cmrErrorType cmrURDFParser::parseLinkData(const XMLElement *curLinkElement,
   //! get inertial parameters
   const XMLElement *inertialElement =
       curLinkElement->FirstChildElement("inertial");
-  _NULLPOINTER_CHECK(inertialElement, "No inertial element in URDF file");
+  _CHECK_NULLPOINTER(inertialElement, "No inertial element in URDF file");
 
   // mass center origin
   const XMLElement *massOriginElement =
@@ -207,7 +207,7 @@ cmrErrorType cmrURDFParser::parseJointData(const XMLElement *curJointElement,
   // joint origin
   const XMLElement *originElement =
       curJointElement->FirstChildElement("origin");
-  _NULLPOINTER_CHECK(originElement, "No joint origin is defined!");
+  _CHECK_NULLPOINTER(originElement, "No joint origin is defined!");
 
   std::istringstream xyz(originElement->FindAttribute("xyz")->Value());
   std::istringstream rpy(originElement->FindAttribute("rpy")->Value());
@@ -219,7 +219,7 @@ cmrErrorType cmrURDFParser::parseJointData(const XMLElement *curJointElement,
 
   // joint limit
   const XMLElement *limitElement = curJointElement->FirstChildElement("limit");
-  _NULLPOINTER_CHECK(limitElement, "No joint limit is defined!");
+  _CHECK_NULLPOINTER(limitElement, "No joint limit is defined!");
   jointData.m_maxEffort =
       std::stod(limitElement->FindAttribute("effort")->Value());
   jointData.m_maxVelocity =
