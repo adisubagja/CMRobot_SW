@@ -15,6 +15,10 @@
 
 namespace cmr {
 
+//! unit convertion function
+#define _DegToRad(deg) (deg * M_PI / 180.0);
+#define _RadToDeg(rad) (rad * 180.0 / M_PI);
+
 //！define matrix
 typedef Eigen::Matrix<double, 2, 2> cmrMatrix2d;
 typedef Eigen::Matrix<float, 2, 2> cmrMatrix2f;

@@ -10,6 +10,7 @@
 #include "cmrException.hpp"
 #include "cmrMathDef.hpp"
 #include "cmrMatrix.hpp"
+#include "cmrMathDef.hpp"
 #include "cmrParser.hpp"
 #include "cmrURDFParser.hpp"
 #include "multiThreadTest.hpp"
