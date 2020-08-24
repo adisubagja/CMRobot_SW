@@ -8,10 +8,12 @@
  * Date: 2020.3.22
  *
  */
+#ifndef CMRPARSER_HPP_
+#define CMRPARSER_HPP_
 
 #include "baseStdLibs.hpp"
 #include "cmrException.hpp"
-#include "cmrRobotData.hpp"
+#include "cmrRobotCfgData.hpp"
 #include "cmrURDFParser.hpp"
 #include "tinyxml2/tinyxml2.h"
 
@@ -26,10 +28,11 @@ public:
 
   //! parse robot config file, and relative config file
   cmrErrorType parseRobotCfgFile(const std::string &robotCfgFile,
-                                 cmrRobotData *robotDataPtr);
+                                 cmrRobotCfgData *robotDataPtr);
 
 private:
   cmrURDFParser m_urdfParser;
 };
 
 } // namespace cmr
+#endif

@@ -14,7 +14,7 @@
 
 #include "baseStdLibs.hpp"
 #include "cmrException.hpp"
-#include "cmrRobotData.hpp"
+#include "cmrRobotCfgData.hpp"
 #include "tinyxml2/tinyxml2.h"
 
 using namespace tinyxml2;
@@ -28,7 +28,7 @@ public:
 
   //! parse URDF file
   cmrErrorType parseURDF(const std::string &URDFFileName,
-                         cmrRobotData *robotDataPtr);
+                         cmrRobotCfgData *robotDataPtr);
 
 protected:
   //! parse link Data

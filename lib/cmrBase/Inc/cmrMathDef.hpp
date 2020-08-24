@@ -9,10 +9,12 @@
 
 #ifndef CMRMATHDEF_HPP_
 #define CMRMATHDEF_HPP_
+#include "cmrMatrix.hpp"
+
 namespace cmr {
 
 //! robot control cycle time
-const double g_controlCycleTime = 0.001;
+const double g_controlCycleTime = 0.01;
 
 //! define pi
 const double g_cmrPI = 3.1415926;

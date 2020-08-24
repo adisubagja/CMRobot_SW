@@ -1,7 +1,7 @@
 /*
- * cmrRobotData.hpp
+ * cmrRobotCfgData.hpp
  *
- * Description: This file provide data struct for robot define
+ * Description: This file provide configure data struct for robot define
  *
  * Author: Feijian.Ni
  * Date: 2020.2.20
@@ -126,8 +126,8 @@ struct cmrTcpData {
 };
 
 //! robot defined data
-struct cmrRobotData {
-  cmrRobotData() : m_robotDoFs(0) {}
+struct cmrRobotCfgData {
+  cmrRobotCfgData() : m_robotDoFs(0) {}
 
   //! init robot data
   inline void init() {

@@ -21,9 +21,9 @@ cmrURDFParser::~cmrURDFParser() {}
 
 //! parse URDF file
 //! Inpute: string of URDF file name
-//! Output: cmrRobotData Struct
+//! Output: cmrRobotCfgData Struct
 cmrErrorType cmrURDFParser::parseURDF(const string &URDFFileName,
-                                      cmrRobotData *robotData) {
+                                      cmrRobotCfgData *robotData) {
 
   //! clear robot data
   robotData->m_linksData.clear();

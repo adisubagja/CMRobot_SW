@@ -21,7 +21,7 @@ cmrDynamics::cmrDynamics()
 cmrDynamics::~cmrDynamics() { delete m_robotModel; }
 
 //! creat robot model with urdf file
-cmrErrorType cmrDynamics::createRobotModel(const cmrRobotData &robotData) {
+cmrErrorType cmrDynamics::createRobotModel(const cmrRobotCfgData &robotData) {
   // creat robot model
   m_robotModel = new RigidBodyDynamics::Model();
   m_linkNameIdMap.clear();

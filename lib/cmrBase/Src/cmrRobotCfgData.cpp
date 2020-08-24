@@ -1,12 +1,12 @@
 /*
- * cmrRobotData.cpp
+ * cmrRobotCfgData.cpp
  *
  * Author: Feijian.Ni
  * Date: 2020.2.20
  *
  */
 
-#include "cmrRobotData.hpp"
+#include "cmrRobotCfgData.hpp"
 
 namespace cmr {
 
@@ -43,7 +43,7 @@ void cmrJointData::printInfo() {
 }
 
 //! print robot info
-void cmrRobotData::printInfo() {
+void cmrRobotCfgData::printInfo() {
   std::cout << "robotName:" << std::setw(12) << m_robotName << std::endl;
   std::cout << "robotDoFs:" << std::setw(12) << m_robotDoFs << std::endl;
 
@@ -58,7 +58,7 @@ void cmrRobotData::printInfo() {
 
 //! get joint data with parent link name
 const cmrJointData *
-cmrRobotData::getChildJointData(const std::string &parentLinkName) const {
+cmrRobotCfgData::getChildJointData(const std::string &parentLinkName) const {
   const cmrJointData *jointDataPtr = nullptr;
   for (const auto &joint : m_jointsData) {
     if (parentLinkName == joint.m_parentLink) {
@@ -71,7 +71,7 @@ cmrRobotData::getChildJointData(const std::string &parentLinkName) const {
 
 //! get link data with child link name
 const cmrLinkData *
-cmrRobotData::getChildLinkData(const cmrJointData *jointDataPtr) const {
+cmrRobotCfgData::getChildLinkData(const cmrJointData *jointDataPtr) const {
   const cmrLinkData *linkDataPtr = nullptr;
   for (auto &link : m_linksData) {
     if (jointDataPtr->m_childLink == link.m_linkName) {

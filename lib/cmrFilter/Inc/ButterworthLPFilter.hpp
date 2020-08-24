@@ -1,5 +1,5 @@
 /*
- *tterworthLPFilterer.hpp
+ *ButterworthLPFilterer.hpp
  *
  * Description: This file provide a rwo filterrthow pass filter template
  * Now this filter support first and second order filter

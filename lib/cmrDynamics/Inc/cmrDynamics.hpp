@@ -8,11 +8,11 @@
  * Date: 2020.2.13
  */
 
-#ifndef CMRDYNAMICS_HPP
-#define CMRDYNAMICS_HPP
+#ifndef CMRDYNAMICS_HPP_
+#define CMRDYNAMICS_HPP_
 
 #include "cmrException.hpp"
-#include "cmrRobotData.hpp"
+#include "cmrRobotCfgData.hpp"
 #include "rbdl/rbdl.h"
 #include <unordered_map>
 
@@ -25,7 +25,7 @@ public:
   ~cmrDynamics();
 
   //! creat robot model with urdf file
-  cmrErrorType createRobotModel(const cmrRobotData &robotData);
+  cmrErrorType createRobotModel(const cmrRobotCfgData &robotData);
 
   //! get robot DoFs
   inline unsigned int getRobotDoFs() { return m_robotDoFs; }

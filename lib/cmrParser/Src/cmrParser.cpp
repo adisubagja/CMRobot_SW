@@ -17,7 +17,7 @@ cmrParser::~cmrParser() {}
 
 //! parse robot config file, and relative config file
 cmrErrorType cmrParser::parseRobotCfgFile(const std::string &robotCfgFile,
-                                          cmrRobotData *robotDataPtr) {
+                                          cmrRobotCfgData *robotDataPtr) {
   //! init robot data struct
   robotDataPtr->init();
 
