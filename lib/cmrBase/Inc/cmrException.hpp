@@ -50,6 +50,12 @@ inline void _ERRORTYPE_CHECK(cmrErrorType errorType) {
   }
 }
 
+//! throw cmr exception
+inline cmrErrorType _ERROR_RETURN(std::string msg) {
+  throw cmrException(msg);
+  return CMR_ERROR;
+}
+
 //! check if a pointer is null
 template <typename T> inline void _CHECK_NULLPOINTER(T ptr, std::string msg) {
   assert(std::is_pointer<T>::value);
