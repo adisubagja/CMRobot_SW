@@ -63,7 +63,20 @@ private:
   //! limit velocity
   double m_limitVel;
 
-  //!
+  //! acceleration period
+  double m_accT;
+
+  //! constant jert time-interval during acceleration phase
+  double m_accJerkT;
+
+  //! constant velocity period
+  double m_constVelT;
+  
+  //! deceleration period
+  double m_decT;
+
+  //! constant jert time-interval during deceleration phase
+  double m_decJerkT;
 };
 
 } // namespace cmr
