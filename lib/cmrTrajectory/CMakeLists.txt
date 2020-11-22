@@ -4,7 +4,7 @@
 #############################################################
 
 # add all the source file to variable SRC_FILE
-#set(SRC_FILES ${SRC_FILES} ${CMAKE_CURRENT_SOURCE_DIR}/CoppeliaRemoteAPI/remoteApi/extApi.c)
+#set(SRC_FILES ${SRC_FILES} ${CMAKE_CURRENT_SOURCE_DIR}/cmrTrajectory/remoteApi/extApi.c)
 #set(SRC_FILES ${SRC_FILES} ${CMAKE_CURRENT_SOURCE_DIR}/CoppeliaRemoteAPI/remoteApi/extApiPlatform.c)
 
 # add the directories of relative head files
