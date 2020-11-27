@@ -14,7 +14,7 @@
 namespace cmr {
 
 //! robot control cycle time
-const double g_controlCycleTime = 0.01;
+const double g_controlCycleTime = 0.001 * 200;
 
 //! define pi
 const double g_cmrPI = 3.1415926;
